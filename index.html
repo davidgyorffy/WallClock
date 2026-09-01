@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=60">
+  <link rel="manifest" href="./manifest.json?v=61">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1650,7 +1650,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="60">
+<body data-wallclock-version="61">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1697,7 +1697,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v60</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v61</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -3547,26 +3547,180 @@ function playOneBeep(startTime) {
   }
 }
 
+
+/* v61 – one direct sound route for list preview and hourly playback */
+function v61EnsureAudioContext() {
+  try {
+    if (!audioContext) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return false;
+      audioContext = new Ctx();
+    }
+    if (audioContext.state === "suspended" && audioContext.resume) {
+      try { audioContext.resume(); } catch (_) {}
+    }
+    audioUnlocked = true;
+    return true;
+  } catch (e) {
+    console.warn("v61 audio context error:", e);
+    return false;
+  }
+}
+
+function v61PlaySynthListSoundOnce(selected) {
+  if (!v61EnsureAudioContext() || !audioContext) return false;
+
+  var t = audioContext.currentTime + 0.03;
+  var vol = 0.48 * (settings.beepVolume / 100);
+
+  if (playDigitalWatchPattern(selected, t, vol)) return true;
+
+  switch (selected) {
+    case "digital":
+      tone(t, 1550, 0.12, "square", vol); break;
+    case "soft": tone(t, 900, 0.14, "sine", vol * 0.75); break;
+    case "sharp": tone(t, 2200, 0.075, "square", vol); break;
+    case "retro":
+      tone(t, 1250, 0.11, "square", vol * 0.95);
+      tone(t + 0.055, 980, 0.07, "square", vol * 0.55); break;
+    case "high": tone(t, 2600, 0.09, "sine", vol); break;
+    case "low": tone(t, 620, 0.15, "square", vol); break;
+    case "doubletone":
+      tone(t, 1200, 0.12, "sine", vol * 0.8);
+      tone(t, 1800, 0.12, "sine", vol * 0.55); break;
+    case "square": tone(t, 1500, 0.12, "square", vol); break;
+    case "sine": tone(t, 1550, 0.13, "sine", vol); break;
+    case "chirp": tone(t, 900, 0.13, "sine", vol * 0.9, 2300); break;
+    case "bell1":
+      tone(t, 1300, 0.18, "sine", vol * 0.75);
+      tone(t, 2600, 0.10, "sine", vol * 0.32); break;
+    case "bell2":
+      tone(t, 1750, 0.16, "sine", vol * 0.8);
+      tone(t, 3500, 0.08, "sine", vol * 0.28); break;
+    case "pulse":
+      tone(t, 1400, 0.05, "square", vol);
+      tone(t + 0.07, 1400, 0.05, "square", vol); break;
+    case "pager":
+      tone(t, 1150, 0.08, "square", vol);
+      tone(t + 0.09, 1450, 0.08, "square", vol); break;
+    case "watch": tone(t, 2050, 0.055, "square", vol * 0.8); break;
+    case "microwave":
+      tone(t, 980, 0.12, "square", vol);
+      tone(t + 0.13, 980, 0.12, "square", vol); break;
+    case "terminal": tone(t, 880, 0.07, "square", vol * 0.8); break;
+    case "arcade":
+      tone(t, 700, 0.07, "square", vol);
+      tone(t + 0.07, 1200, 0.07, "square", vol); break;
+    case "soft2": tone(t, 1750, 0.15, "sine", vol * 0.65); break;
+    case "soft3": tone(t, 720, 0.18, "sine", vol * 0.7); break;
+    case "ping": tone(t, 2000, 0.11, "sine", vol * 0.78); break;
+    case "ping2":
+      tone(t, 1900, 0.08, "sine", vol * 0.75);
+      tone(t + 0.09, 2400, 0.08, "sine", vol * 0.55); break;
+    case "click": tone(t, 3200, 0.035, "square", vol * 0.75); break;
+    case "beacon":
+      tone(t, 800, 0.10, "sine", vol * 0.7);
+      tone(t + 0.09, 1600, 0.10, "sine", vol * 0.65); break;
+    case "alarm":
+      tone(t, 1800, 0.06, "square", vol);
+      tone(t + 0.07, 1100, 0.06, "square", vol); break;
+    case "metallic":
+      tone(t, 2400, 0.10, "triangle", vol * 0.8);
+      tone(t, 3100, 0.08, "sine", vol * 0.35); break;
+    case "glass":
+      tone(t, 2800, 0.16, "sine", vol * 0.6);
+      tone(t, 4200, 0.10, "sine", vol * 0.2); break;
+    case "warm": tone(t, 780, 0.15, "triangle", vol * 0.8); break;
+    case "cold": tone(t, 2300, 0.11, "triangle", vol * 0.78); break;
+    case "gameboy":
+      tone(t, 1046, 0.055, "square", vol * 0.8);
+      tone(t + 0.055, 1318, 0.055, "square", vol * 0.8); break;
+    case "laser": tone(t, 2800, 0.16, "sawtooth", vol * 0.65, 450); break;
+    case "coin":
+      tone(t, 987, 0.05, "square", vol * 0.75);
+      tone(t + 0.055, 1975, 0.10, "square", vol * 0.75); break;
+    case "blip": tone(t, 1350, 0.045, "square", vol * 0.75); break;
+    case "bloop": tone(t, 520, 0.08, "sine", vol * 0.8); break;
+    case "tick": tone(t, 2600, 0.018, "square", vol * 0.55); break;
+    case "tock": tone(t, 880, 0.035, "square", vol * 0.65); break;
+    case "chime":
+      tone(t, 1200, 0.15, "sine", vol * 0.65);
+      tone(t + 0.08, 1800, 0.18, "sine", vol * 0.5); break;
+    case "chime2":
+      tone(t, 900, 0.12, "sine", vol * 0.6);
+      tone(t + 0.08, 1350, 0.12, "sine", vol * 0.55);
+      tone(t + 0.16, 1800, 0.16, "sine", vol * 0.45); break;
+    case "hollow": tone(t, 580, 0.20, "sine", vol * 0.6); break;
+    case "resonant":
+      tone(t, 720, 0.18, "triangle", vol * 0.72);
+      tone(t, 1440, 0.13, "sine", vol * 0.22); break;
+    case "bright": tone(t, 3100, 0.09, "sine", vol * 0.68); break;
+    case "muted": tone(t, 700, 0.07, "square", vol * 0.45); break;
+    case "pulse2":
+      tone(t, 1000, 0.045, "square", vol * 0.72);
+      tone(t + 0.07, 1500, 0.045, "square", vol * 0.72); break;
+    case "pulse3":
+      tone(t, 900, 0.04, "square", vol * 0.65);
+      tone(t + 0.06, 1300, 0.04, "square", vol * 0.65);
+      tone(t + 0.12, 1700, 0.04, "square", vol * 0.65); break;
+    case "shortwave":
+      tone(t, 2500, 0.04, "square", vol * 0.55);
+      tone(t + 0.05, 1700, 0.04, "square", vol * 0.55); break;
+    case "modem":
+      tone(t, 900, 0.04, "square", vol * 0.65);
+      tone(t + 0.04, 1300, 0.04, "square", vol * 0.65);
+      tone(t + 0.08, 1700, 0.04, "square", vol * 0.65); break;
+    case "robot":
+      tone(t, 620, 0.06, "square", vol * 0.85);
+      tone(t + 0.055, 930, 0.06, "square", vol * 0.85); break;
+    case "satellite":
+      tone(t, 2400, 0.04, "sine", vol * 0.72);
+      tone(t + 0.07, 1800, 0.04, "sine", vol * 0.62); break;
+    case "drop": tone(t, 1500, 0.16, "sine", vol * 0.62, 520); break;
+    case "spark":
+      tone(t, 4200, 0.025, "square", vol * 0.55);
+      tone(t + 0.03, 3000, 0.025, "square", vol * 0.46); break;
+    case "minimal": tone(t, 1250, 0.065, "sine", vol * 0.62); break;
+    case "classic2":
+      tone(t, 1000, 0.10, "square", vol * 0.82);
+      tone(t, 2000, 0.07, "square", vol * 0.30); break;
+    default:
+      tone(t, 1550, 0.12, "square", vol); break;
+  }
+  return true;
+}
+
+function v61PlayListSoundOnce(selected) {
+  if (!selected || selected === "none") return false;
+
+  if (selected === "casioClassic") {
+    return !!playEmbeddedCasioClassic();
+  }
+
+  if (typeof EMBEDDED_CHIME_KEYS !== "undefined" && EMBEDDED_CHIME_KEYS.has(selected)) {
+    return !!playEmbeddedChimeByKey(selected);
+  }
+
+  return v61PlaySynthListSoundOnce(selected);
+}
+
+function v61PlayConfiguredHourlySound() {
+  var selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+
+  if (selected !== "none") {
+    return v61PlayListSoundOnce(selected);
+  }
+
+  if (v43HasManualSound()) {
+    return v43PlayManualSound();
+  }
+
+  return false;
+}
+
 function playDoubleBeep() {
-  const v43Result = v43PlaySelectedSound();
-  if (v43Result === true || v43Result === false) return;
-
-  if (EMBEDDED_CHIME_KEYS.has(settings.beepSound)) {
-    playEmbeddedChimeByKey(settings.beepSound);
-    return;
-  }
-
-  if (settings.beepSound === "none" && !v43HasManualSound()) return;
-  if (settings.beepSound === "casioClassic") {
-    playEmbeddedCasioClassic();
-    return;
-  }
-
-  unlockAudio();
-  if (!audioContext) return;
-  const t = audioContext.currentTime + 0.03;
-  playOneBeep(t);
-  playOneBeep(t + 0.20);
+  /* v61: hourly sound uses exactly the same direct route as preview. */
+  v61PlayConfiguredHourlySound();
 }
 
 function maybeHourlyChime(now) {
@@ -4682,35 +4836,23 @@ customSoundDelete.addEventListener("click", () => {
   customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
-function v60PreviewListSoundOnce() {
-  const selected = (settings && settings.beepSound) ? settings.beepSound : "none";
-
-  /* No List Sound means: do not preview the manual sound automatically. */
+function v61PreviewSelectedListSound() {
+  var selected = beepSound ? beepSound.value : "none";
   if (selected === "none") return;
-
-  v43UnlockAudio();
-  unlockAudio();
-
-  if (selected === "casioClassic") {
-    playEmbeddedCasioClassic();
-    return;
-  }
-
-  if (typeof EMBEDDED_CHIME_KEYS !== "undefined" && EMBEDDED_CHIME_KEYS.has(selected)) {
-    playEmbeddedChimeByKey(selected);
-    return;
-  }
-
-  if (!audioContext) return;
-
-  /* Synthesized list sounds: one single instance only. */
-  const t = audioContext.currentTime + 0.03;
-  playOneBeep(t);
+  v61PlayListSoundOnce(selected);
 }
 
-beepSound.addEventListener("change", () => {
-  saveSettings();
-  v60PreviewListSoundOnce();
+beepSound.addEventListener("change", function () {
+  /* Save directly: do not depend on the large general saveSettings() routine. */
+  settings.beepSound = beepSound.value;
+  localStorage.setItem("beepSound", settings.beepSound);
+
+  /* A list selection is also the user gesture that unlocks WebAudio on iPad. */
+  v61EnsureAudioContext();
+
+  if (settings.beepSound !== "none") {
+    v61PreviewSelectedListSound();
+  }
 });
 
 
@@ -4757,8 +4899,12 @@ calendarWeekFontFamily.addEventListener("change",()=>{settings.calendarWeekFontF
 
 
 (function () {
+  function v61UnlockAllAudio() {
+    try { v43UnlockAudio(); } catch (_) {}
+    try { v61EnsureAudioContext(); } catch (_) {}
+  }
   ["pointerdown", "touchstart", "click"].forEach(function (evt) {
-    document.addEventListener(evt, v43UnlockAudio, { once: true, passive: true });
+    document.addEventListener(evt, v61UnlockAllAudio, { once: true, passive: true });
   });
 })();
 </script>
@@ -5074,7 +5220,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=60", { updateViaCache: "none" })
+      .register("./service-worker.js?v=61", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
