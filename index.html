@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=55">
+  <link rel="manifest" href="./manifest.json?v=56">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1487,9 +1487,9 @@ body.pseudo-fullscreen #app {
     0.72em is intentionally fixed so a 1->8 change cannot recenter
     the whole two-digit HH/MM group.
   */
-  width: .72em !important;
-  min-width: .72em !important;
-  max-width: .72em !important;
+  width: .58em !important;
+  min-width: .58em !important;
+  max-width: .58em !important;
   height: 1em !important;
   line-height: 1em !important;
 
@@ -1617,9 +1617,16 @@ body.pseudo-fullscreen #app {
   opacity: 1 !important;
 }
 
+
+/* v56 – tighter HH:MM digit spacing while preserving independent digit slots */
+#hours .clock-digit-slot + .clock-digit-slot,
+#minutes .clock-digit-slot + .clock-digit-slot {
+  margin-left: -.035em !important;
+}
+
 </style>
 </head>
-<body data-wallclock-version="55">
+<body data-wallclock-version="56">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1666,7 +1673,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v55</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v56</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -5005,7 +5012,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=55", { updateViaCache: "none" })
+      .register("./service-worker.js?v=56", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
