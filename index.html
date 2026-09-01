@@ -1601,6 +1601,22 @@ body.pseudo-fullscreen #app {
   animation: none !important;
 }
 
+
+/* v52 – weather temperature visibility repair */
+#temperature {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: inherit !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.weather-main {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1614,9 +1630,15 @@ body.pseudo-fullscreen #app {
     </header>
 
     <section id="clock" class="clock text-backdrop" aria-label="Pontos idő">
-      <span id="hours"><span class="clock-digit-slot" data-value="1"><span class="clock-digit-current">1</span></span><span class="clock-digit-slot" data-value="4"><span class="clock-digit-current">4</span></span></span><span class="clock-digit">4</span></span>
+      <span id="hours">
+        <span class="clock-digit-slot" data-value="1"><span class="clock-digit-current">1</span></span>
+        <span class="clock-digit-slot" data-value="4"><span class="clock-digit-current">4</span></span>
+      </span>
       <span id="colonSpacer" class="colon-spacer" aria-hidden="true"></span>
-      <span id="minutes"><span class="clock-digit-slot" data-value="3"><span class="clock-digit-current">3</span></span><span class="clock-digit-slot" data-value="7"><span class="clock-digit-current">7</span></span></span><span class="clock-digit">7</span></span>
+      <span id="minutes">
+        <span class="clock-digit-slot" data-value="3"><span class="clock-digit-current">3</span></span>
+        <span class="clock-digit-slot" data-value="7"><span class="clock-digit-current">7</span></span>
+      </span>
     </section>
 
     <div id="clockSeparator" class="clock-separator" aria-hidden="true">
