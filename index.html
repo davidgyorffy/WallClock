@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=59">
+  <link rel="manifest" href="./manifest.json?v=60">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1650,7 +1650,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="59">
+<body data-wallclock-version="60">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1697,7 +1697,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v59</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v60</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -4682,9 +4682,35 @@ customSoundDelete.addEventListener("click", () => {
   customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
+function v60PreviewListSoundOnce() {
+  const selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+
+  /* No List Sound means: do not preview the manual sound automatically. */
+  if (selected === "none") return;
+
+  v43UnlockAudio();
+  unlockAudio();
+
+  if (selected === "casioClassic") {
+    playEmbeddedCasioClassic();
+    return;
+  }
+
+  if (typeof EMBEDDED_CHIME_KEYS !== "undefined" && EMBEDDED_CHIME_KEYS.has(selected)) {
+    playEmbeddedChimeByKey(selected);
+    return;
+  }
+
+  if (!audioContext) return;
+
+  /* Synthesized list sounds: one single instance only. */
+  const t = audioContext.currentTime + 0.03;
+  playOneBeep(t);
+}
+
 beepSound.addEventListener("change", () => {
   saveSettings();
-  playDoubleBeep();
+  v60PreviewListSoundOnce();
 });
 
 
@@ -5048,7 +5074,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=59", { updateViaCache: "none" })
+      .register("./service-worker.js?v=60", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
