@@ -1251,6 +1251,109 @@ body.pseudo-fullscreen #app {
   to { transform:translate3d(3px,0,0); opacity:.95; }
 }
 
+
+/* ================================================================
+   v48 – UI FINETUNING / IPAD AIR 2 OPTIMIZATION
+   ================================================================ */
+
+/* Setup and Fullscreen: identical, nearly invisible */
+#fullscreenButton,
+#settingsButton,
+#androidControls #fullscreenButton,
+#androidControls #settingsButton {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  color: rgba(255,255,255,.045) !important;
+  text-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+#fullscreenButton:active,
+#settingsButton:active,
+#androidControls #fullscreenButton:active,
+#androidControls #settingsButton:active {
+  color: rgba(255,255,255,.20) !important;
+}
+
+/* CLOCK SETUP main section headings */
+#settingsPanel .settings-group > h3 {
+  margin: 30px 0 15px 0 !important;
+  padding: 12px 0 10px 0 !important;
+  color: #ffd84d !important;
+  font-size: 19px !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+  letter-spacing: .065em !important;
+  text-transform: uppercase !important;
+  border-top: 1px solid rgba(255,216,77,.22) !important;
+  border-bottom: 1px solid rgba(255,216,77,.28) !important;
+  opacity: 1 !important;
+}
+#settingsPanel .settings-group:first-of-type > h3 {
+  margin-top: 12px !important;
+}
+
+/* Better touch feel on ranges */
+#settingsPanel input[type="range"] {
+  touch-action: pan-x !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Calendar Week size is now a real pixel value, not a percentage scale */
+#calendarWeek {
+  font-size: var(--calendar-week-size, 48px) !important;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--v42-calendar-x, 0px), calc(-1 * var(--v42-calendar-y, 0px)))
+    scaleX(var(--calendar-week-font-x,1))
+    scaleY(var(--calendar-week-font-y,1)) !important;
+}
+
+/* Clock animation: transform/opacity only, no filters or blur. */
+#hours,
+#minutes {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+#hours.v48-flip,
+#minutes.v48-flip {
+  animation: v48ClockFlip .48s cubic-bezier(.22,.72,.18,1);
+}
+#hours.v48-fade,
+#minutes.v48-fade {
+  animation: v48ClockFade .42s ease-out;
+}
+#hours.v48-slide,
+#minutes.v48-slide {
+  animation: v48ClockSlide .42s cubic-bezier(.2,.75,.2,1);
+}
+
+@keyframes v48ClockFlip {
+  0%   { transform: perspective(700px) rotateX(-88deg) translateZ(0); opacity:.18; }
+  52%  { transform: perspective(700px) rotateX(8deg) translateZ(0); opacity:1; }
+  74%  { transform: perspective(700px) rotateX(-3deg) translateZ(0); }
+  100% { transform: perspective(700px) rotateX(0deg) translateZ(0); opacity:1; }
+}
+@keyframes v48ClockFade {
+  0%   { opacity:.08; transform:translateZ(0) scale(.985); }
+  100% { opacity:1; transform:translateZ(0) scale(1); }
+}
+@keyframes v48ClockSlide {
+  0%   { opacity:.08; transform:translate3d(0,-.24em,0); }
+  100% { opacity:1; transform:translate3d(0,0,0); }
+}
+
+/* Never animate while the settings panel is being manipulated unnecessarily. */
+@media (prefers-reduced-motion: reduce) {
+  #hours, #minutes { animation:none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1635,6 +1738,14 @@ body.pseudo-fullscreen #app {
 <label>Karakterszélesség <span id="clockFontScaleXValue">100%</span><input id="clockFontScaleX" type="range" min="50" max="160" value="100"></label>
 <label>Karaktermagasság <span id="clockFontScaleYValue">100%</span><input id="clockFontScaleY" type="range" min="50" max="160" value="100"></label>
 <label>HH:MM mérete <span id="clockSizeValue">100%</span><input id="clockSize" type="range" min="65" max="130" value="100"></label>
+<label>Animáció típusa
+  <select id="clockAnimation">
+    <option value="none">None</option>
+    <option value="flip">Flip</option>
+    <option value="fade">Fade</option>
+    <option value="slide">Slide</option>
+  </select>
+</label>
 <label>H-pozíció <span id="clockXValue">0 px</span>
       <input id="clockX" type="range" min="-500" max="500" step="1" value="0">
     </label>
@@ -2157,7 +2268,7 @@ body.pseudo-fullscreen #app {
   <div class="subgroup"><h4>Karakterbeállítás</h4>
     <label>Karakterszélesség <span id="calendarWeekFontScaleXValue">100%</span><input id="calendarWeekFontScaleX" type="range" min="50" max="160" step="1" value="100"></label>
     <label>Karaktermagasság <span id="calendarWeekFontScaleYValue">100%</span><input id="calendarWeekFontScaleY" type="range" min="50" max="160" step="1" value="100"></label>
-    <label>Mérete <span id="calendarWeekSizeValue">100%</span><input id="calendarWeekSize" type="range" min="50" max="300" step="1" value="100"></label>
+    <label>Mérete <span id="calendarWeekSizeValue">48 px</span><input id="calendarWeekSize" type="range" min="20" max="500" step="1" value="48"></label>
     <label>H-pozíció <span id="calendarWeekXValue">0 px</span><input id="calendarWeekX" type="range" min="-500" max="500" step="1" value="0"></label>
     <label>V-pozíció <span id="calendarWeekYValue">0 px</span><input id="calendarWeekY" type="range" min="-40" max="40" step="1" value="0"></label>
   </div>
@@ -2419,6 +2530,7 @@ const weatherFontScaleY = document.getElementById("weatherFontScaleY");
 const secondsFontScaleX = document.getElementById("secondsFontScaleX");
 const secondsFontScaleY = document.getElementById("secondsFontScaleY");
 const clockSize = document.getElementById("clockSize");
+const clockAnimation = document.getElementById("clockAnimation");
 const clockY = document.getElementById("clockY");
 const separatorShape = document.getElementById("separatorShape");
 const separatorMode = document.getElementById("separatorMode");
@@ -2510,7 +2622,7 @@ const settings = {
   calendarWeekFontBold: localStorage.getItem("calendarWeekFontBold") === "true",
   calendarWeekFontScaleX: Number(localStorage.getItem("calendarWeekFontScaleX") || 100),
   calendarWeekFontScaleY: Number(localStorage.getItem("calendarWeekFontScaleY") || 100),
-  calendarWeekSize: Number(localStorage.getItem("calendarWeekSize") || 100),
+  calendarWeekSize: Number(localStorage.getItem("calendarWeekSizePx") || 48),
   calendarWeekX: Number(localStorage.getItem("calendarWeekX") || 0),
   calendarWeekY: Number(localStorage.getItem("calendarWeekY") || 0),
   backgroundColor: localStorage.getItem("backgroundColor") || "#000000",
@@ -2534,6 +2646,7 @@ const settings = {
   secondsFontScaleX: Number(localStorage.getItem("secondsFontScaleX") || 100),
   secondsFontScaleY: Number(localStorage.getItem("secondsFontScaleY") || 100),
   clockSize: Number(localStorage.getItem("clockSize") || 100),
+  clockAnimation: localStorage.getItem("clockAnimation") || "none",
   clockY: Number(localStorage.getItem("clockY") || 0),
   separatorShape: localStorage.getItem("separatorShape") || "circle",
   separatorMode: localStorage.getItem("separatorMode") || "blink",
@@ -2587,7 +2700,29 @@ function getISOWeekNumber(date) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 function updateCalendarWeek(now = new Date()) {
-  calendarWeekText.textContent = `CW${getISOWeekNumber(now)}`;
+  calendarWeekText.textContent = `cw${getISOWeekNumber(now)}`;
+}
+
+
+function v48SetClockPart(el, newText) {
+  if (!el || el.textContent === newText) return;
+  el.textContent = newText;
+
+  const mode = (settings && settings.clockAnimation) ? settings.clockAnimation : "none";
+  if (mode === "none") return;
+
+  const cls = "v48-" + mode;
+  el.classList.remove("v48-flip", "v48-fade", "v48-slide");
+
+  /* A forced style flush happens only on a real hour/minute change,
+     never during the normal 250 ms clock refresh. */
+  void el.offsetWidth;
+  el.classList.add(cls);
+
+  clearTimeout(el._v48AnimationTimer);
+  el._v48AnimationTimer = setTimeout(function () {
+    el.classList.remove(cls);
+  }, 560);
 }
 
 function updateClock() {
@@ -2599,8 +2734,8 @@ function updateClock() {
   const newMinutesText = pad2(now.getMinutes());
   if (dateEl.textContent !== newDateText) dateEl.textContent = newDateText;
   if (weekdayEl.textContent !== newWeekdayText) weekdayEl.textContent = newWeekdayText;
-  if (hoursEl.textContent !== newHoursText) hoursEl.textContent = newHoursText;
-  if (minutesEl.textContent !== newMinutesText) minutesEl.textContent = newMinutesText;
+  v48SetClockPart(hoursEl, newHoursText);
+  v48SetClockPart(minutesEl, newMinutesText);
   const sec = now.getSeconds();
   const ms = now.getMilliseconds();
   if (settings.secondsFormat === "TENTH") {
@@ -3417,7 +3552,7 @@ function applySettingsToUI() {
   applyBoldState(calendarWeek, settings.calendarWeekFontFamily, settings.calendarWeekFontBold);
   app.style.setProperty("--calendar-week-font-x", settings.calendarWeekFontScaleX / 100);
   app.style.setProperty("--calendar-week-font-y", settings.calendarWeekFontScaleY / 100);
-  app.style.setProperty("--calendar-week-scale", settings.calendarWeekSize / 100);
+  app.style.setProperty("--calendar-week-size", `${settings.calendarWeekSize}px`);
   app.style.setProperty("--calendar-week-x", `${settings.calendarWeekX}px`);
   app.style.setProperty("--calendar-week-y", `${settings.calendarWeekY}vh`);
   showCalendarWeek.checked = settings.showCalendarWeek;
@@ -3429,7 +3564,7 @@ function applySettingsToUI() {
   calendarWeekY.value = settings.calendarWeekY;
   calendarWeekFontScaleXValue.textContent = `${settings.calendarWeekFontScaleX}%`;
   calendarWeekFontScaleYValue.textContent = `${settings.calendarWeekFontScaleY}%`;
-  calendarWeekSizeValue.textContent = `${settings.calendarWeekSize}%`;
+  calendarWeekSizeValue.textContent = `${settings.calendarWeekSize} px`;
   calendarWeekXValue.textContent = `${settings.calendarWeekX}`;
   calendarWeekYValue.textContent = `${settings.calendarWeekY}`;
   updateBackgroundVisuals();
@@ -3475,6 +3610,7 @@ function applySettingsToUI() {
   secondsFontScaleY.value = settings.secondsFontScaleY;
 
   clockSize.value = settings.clockSize;
+  if (clockAnimation) clockAnimation.value = settings.clockAnimation;
   clockY.value = settings.clockY;
   separatorShape.value = settings.separatorShape;
   separatorMode.value = settings.separatorMode;
@@ -3584,6 +3720,7 @@ function saveSettings() {
   settings.secondsFontScaleX = Number(secondsFontScaleX.value);
   settings.secondsFontScaleY = Number(secondsFontScaleY.value);
   settings.clockSize = Number(clockSize.value);
+  if (clockAnimation) settings.clockAnimation = clockAnimation.value;
   settings.clockY = Number(clockY.value);
   settings.separatorShape = separatorShape.value;
   settings.separatorMode = separatorMode.value;
@@ -3615,6 +3752,7 @@ function saveSettings() {
   for (const [key, value] of Object.entries(settings)) {
     if (key !== "backgroundImage") localStorage.setItem(key, value);
   }
+  localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
 
   applySettingsToUI();
 }
@@ -3670,18 +3808,149 @@ closeSettings.addEventListener("click", () => {
   settingsPanel.style.removeProperty("pointer-events");
 });
 
+
+/* v48: lightweight RAF-based live range updates */
+let v48RangeRAF = 0;
+const v48PendingRanges = new Map();
+
+function v48RangeKey(id) {
+  const map = {
+    headerFontScaleX:"headerFontScaleX", headerFontScaleY:"headerFontScaleY",
+    clockFontScaleX:"clockFontScaleX", clockFontScaleY:"clockFontScaleY",
+    weatherFontScaleX:"weatherFontScaleX", weatherFontScaleY:"weatherFontScaleY",
+    secondsFontScaleX:"secondsFontScaleX", secondsFontScaleY:"secondsFontScaleY",
+    clockSize:"clockSize", separatorSize:"separatorSize", separatorGap:"separatorGap",
+    secondsSize:"secondsSize", headerSize:"headerSize", weatherSize:"weatherSize",
+    textBackdropOpacity:"textBackdropOpacity", dayBrightness:"dayBrightness",
+    nightBrightness:"nightBrightness", beepVolume:"beepVolume",
+    calendarWeekFontScaleX:"calendarWeekFontScaleX",
+    calendarWeekFontScaleY:"calendarWeekFontScaleY",
+    calendarWeekSize:"calendarWeekSize"
+  };
+  return map[id] || null;
+}
+
+function v48ApplyRangeNow(el) {
+  if (!el) return;
+  const id = el.id;
+  const v = Number(el.value);
+  const key = v48RangeKey(id);
+  if (key) settings[key] = v;
+
+  switch (id) {
+    case "headerFontScaleX":
+      app.style.setProperty("--header-font-x", v/100);
+      headerFontScaleXValue.textContent = v + "%"; break;
+    case "headerFontScaleY":
+      app.style.setProperty("--header-font-y", v/100);
+      headerFontScaleYValue.textContent = v + "%"; break;
+    case "clockFontScaleX":
+      app.style.setProperty("--clock-font-x", .82*v/100);
+      clockFontScaleXValue.textContent = v + "%"; break;
+    case "clockFontScaleY":
+      app.style.setProperty("--clock-font-y", v/100);
+      clockFontScaleYValue.textContent = v + "%"; break;
+    case "weatherFontScaleX":
+      app.style.setProperty("--weather-font-x", v/100);
+      weatherFontScaleXValue.textContent = v + "%"; break;
+    case "weatherFontScaleY":
+      app.style.setProperty("--weather-font-y", v/100);
+      weatherFontScaleYValue.textContent = v + "%"; break;
+    case "secondsFontScaleX":
+      app.style.setProperty("--seconds-font-x", v/100);
+      secondsFontScaleXValue.textContent = v + "%"; break;
+    case "secondsFontScaleY":
+      app.style.setProperty("--seconds-font-y", v/100);
+      secondsFontScaleYValue.textContent = v + "%"; break;
+    case "calendarWeekFontScaleX":
+      app.style.setProperty("--calendar-week-font-x", v/100);
+      calendarWeekFontScaleXValue.textContent = v + "%"; break;
+    case "calendarWeekFontScaleY":
+      app.style.setProperty("--calendar-week-font-y", v/100);
+      calendarWeekFontScaleYValue.textContent = v + "%"; break;
+    case "calendarWeekSize":
+      app.style.setProperty("--calendar-week-size", v + "px");
+      calendarWeekSizeValue.textContent = v + " px"; break;
+    case "clockSize":
+      app.style.setProperty("--clock-scale", v/100);
+      clockSizeValue.textContent = v + "%"; break;
+    case "secondsSize":
+      app.style.setProperty("--seconds-scale", v/100);
+      secondsSizeValue.textContent = v + "%"; break;
+    case "headerSize":
+      app.style.setProperty("--header-scale", v/100);
+      headerSizeValue.textContent = v + "%"; break;
+    case "weatherSize":
+      app.style.setProperty("--weather-scale", v/100);
+      weatherSizeValue.textContent = v + "%"; break;
+    case "separatorSize":
+      app.style.setProperty("--separator-size", v + "px");
+      separatorSizeValue.textContent = v + " px"; break;
+    case "separatorGap":
+      app.style.setProperty("--separator-gap", v + "px");
+      separatorGapValue.textContent = v + " px"; break;
+    case "textBackdropOpacity":
+      app.style.setProperty("--backdrop-opacity", v/100);
+      textBackdropValue.textContent = v + "%"; break;
+    case "dayBrightness":
+      dayBrightnessValue.textContent = v + "%";
+      applyBrightness(new Date().getHours()); break;
+    case "nightBrightness":
+      nightBrightnessValue.textContent = v + "%";
+      applyBrightness(new Date().getHours()); break;
+    case "beepVolume":
+      beepVolumeValue.textContent = v + "%"; break;
+  }
+}
+
+function v48QueueRange(el) {
+  v48PendingRanges.set(el.id, el);
+  if (v48RangeRAF) return;
+  v48RangeRAF = requestAnimationFrame(function () {
+    v48RangeRAF = 0;
+    v48PendingRanges.forEach(v48ApplyRangeNow);
+    v48PendingRanges.clear();
+  });
+}
+
+function v48PersistRange(el) {
+  v48ApplyRangeNow(el);
+  const key = v48RangeKey(el.id);
+  if (!key) return;
+  if (el.id === "calendarWeekSize") {
+    localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+  } else {
+    localStorage.setItem(key, String(settings[key]));
+  }
+}
+
 [
   showHeader, showClock, showWeather, showWeatherText,
   headerFontFamily, headerFontScaleX, headerFontScaleY,
-  clockFontFamily, clockFontScaleX, clockFontScaleY, clockSize, clockY,
+  clockFontFamily, clockFontScaleX, clockFontScaleY, clockSize, clockAnimation, clockY,
   weatherFontFamily, weatherFontScaleX, weatherFontScaleY,
   separatorShape, separatorMode, separatorSize, separatorX, separatorY, separatorGap,
   showSeconds, secondsFontFamily, secondsFontScaleX, secondsFontScaleY, secondsFormat, secondsSize, secondsX, secondsY,
   headerSize, headerY, weatherSize, weatherX, weatherY,
   bgColor, textBackdropOpacity, dayBrightness, nightBrightness, beepSound, beepVolume
 ].forEach(el => {
-  el.addEventListener(el.type === "checkbox" ? "change" : "input", saveSettings);
-  if (el.tagName === "SELECT") el.addEventListener("change", saveSettings);
+  if (!el) return;
+
+  if (el.type === "range") {
+    /* Position sliders are owned by the v42 independent-position engine. */
+    const positionIds = new Set([
+      "headerX","headerY","clockX","clockY","secondsX","secondsY",
+      "separatorX","separatorY","weatherX","weatherY",
+      "calendarWeekX","calendarWeekY"
+    ]);
+    if (!positionIds.has(el.id)) {
+      el.addEventListener("input", function () { v48QueueRange(el); }, {passive:true});
+      el.addEventListener("change", function () { v48PersistRange(el); });
+    }
+    return;
+  }
+
+  el.addEventListener("change", saveSettings);
 });
 
 
@@ -3803,11 +4072,6 @@ bgColor.addEventListener("input", () => {
 
 showCalendarWeek.addEventListener("change",()=>{settings.showCalendarWeek=showCalendarWeek.checked;localStorage.setItem("showCalendarWeek",String(settings.showCalendarWeek));applySettingsToUI();});
 calendarWeekFontFamily.addEventListener("change",()=>{settings.calendarWeekFontFamily=calendarWeekFontFamily.value;localStorage.setItem("calendarWeekFontFamily",settings.calendarWeekFontFamily);applySettingsToUI();});
-calendarWeekFontScaleX.addEventListener("input",()=>{settings.calendarWeekFontScaleX=Number(calendarWeekFontScaleX.value);localStorage.setItem("calendarWeekFontScaleX",String(settings.calendarWeekFontScaleX));applySettingsToUI();});
-calendarWeekFontScaleY.addEventListener("input",()=>{settings.calendarWeekFontScaleY=Number(calendarWeekFontScaleY.value);localStorage.setItem("calendarWeekFontScaleY",String(settings.calendarWeekFontScaleY));applySettingsToUI();});
-calendarWeekSize.addEventListener("input",()=>{settings.calendarWeekSize=Number(calendarWeekSize.value);localStorage.setItem("calendarWeekSize",String(settings.calendarWeekSize));applySettingsToUI();});
-calendarWeekX.addEventListener("input",()=>{settings.calendarWeekX=Number(calendarWeekX.value);localStorage.setItem("calendarWeekX",String(settings.calendarWeekX));applySettingsToUI();});
-calendarWeekY.addEventListener("input",()=>{settings.calendarWeekY=Number(calendarWeekY.value);localStorage.setItem("calendarWeekY",String(settings.calendarWeekY));applySettingsToUI();});
 
 
 
@@ -4131,10 +4395,16 @@ window.addEventListener("DOMContentLoaded", function () {
       apply(c, x, y, false);
 
       xi.addEventListener("input", function () {
+        apply(c, Number(xi.value), Number(yi.value), false);
+      }, {passive:true});
+      xi.addEventListener("change", function () {
         apply(c, Number(xi.value), Number(yi.value), true);
       });
 
       yi.addEventListener("input", function () {
+        apply(c, Number(xi.value), Number(yi.value), false);
+      }, {passive:true});
+      yi.addEventListener("change", function () {
         apply(c, Number(xi.value), Number(yi.value), true);
       });
     });
@@ -4182,31 +4452,6 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
-
-<script>
-/* v47 – Calendar Week larger size range + lowercase cw prefix */
-(function () {
-  function patchCalendarWeek() {
-    const sizeSlider =
-      document.getElementById("calendarWeekSize") ||
-      document.querySelector('input[id*="calendar"][id*="Size" i]') ||
-      document.querySelector('input[id*="week"][id*="Size" i]');
-    if (sizeSlider && sizeSlider.type === "range") {
-      sizeSlider.max = "300";
-    }
-
-    const weekEl =
-      document.getElementById("calendarWeek") ||
-      document.querySelector('[id*="calendarWeek"]');
-    if (weekEl && /^CW\d+$/i.test((weekEl.textContent || "").trim())) {
-      weekEl.textContent = weekEl.textContent.replace(/^CW/i, "cw");
-    }
-  }
-
-  patchCalendarWeek();
-  setInterval(patchCalendarWeek, 1000);
-})();
-</script>
 
 </body>
 </html>
