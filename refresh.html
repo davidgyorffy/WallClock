@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WallClock v56 frissítés</title>
+<title>WallClock v57 frissítés</title>
 <style>
 body{background:#000;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:40px 20px}
 h1{font-size:28px}p{font-size:18px;line-height:1.5}button{font-size:20px;padding:14px 20px;margin-top:20px}
 </style>
 </head>
 <body>
-<h1>WallClock v56 frissítés</h1>
+<h1>WallClock v57 frissítés</h1>
 <p id="status">Régi gyorsítótár és Service Worker eltávolítása…</p>
 <button id="go" style="display:none">Falióra megnyitása</button>
 <script>
@@ -34,7 +34,7 @@ h1{font-size:28px}p{font-size:18px;line-height:1.5}button{font-size:20px;padding
 
   Promise.all([clearCaches(),clearWorkers()])
     .then(function(){
-      status.textContent="Kész. A régi PWA gyorsítótár törölve. Most nyisd meg a v56-öt.";
+      status.textContent="Kész. A régi PWA gyorsítótár törölve. Most nyisd meg a v57-öt.";
       go.style.display="inline-block";
     })
     .catch(function(e){
@@ -43,7 +43,7 @@ h1{font-size:28px}p{font-size:18px;line-height:1.5}button{font-size:20px;padding
     });
 
   go.onclick=function(){
-    location.replace("./?v=56&t="+Date.now());
+    location.replace("./?v=57&t="+Date.now());
   };
 })();
 </script>
