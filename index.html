@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=58">
+  <link rel="manifest" href="./manifest.json?v=59">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1633,9 +1633,24 @@ body.pseudo-fullscreen #app {
   z-index: 2 !important;
 }
 
+
+/* v59 – manual sound controls on one line */
+.manual-sound-button-row {
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  width:100% !important;
+  margin-top:8px !important;
+}
+.manual-sound-button-row .secondary-button {
+  flex:1 1 0 !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
 </style>
 </head>
-<body data-wallclock-version="58">
+<body data-wallclock-version="59">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1682,7 +1697,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v58</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v59</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2591,7 +2606,7 @@ body.pseudo-fullscreen #app {
 </section>
 
 <section class="settings-group"><h3>Óránkénti hangjelzés</h3>
-<label>Hang kiválasztása listából<select id="beepSound"><option value="none">** Nincs hang **</option>
+<label>Hang kiválasztása listából<select id="beepSound"><option value="none">No List Sound</option>
 <option value="casioClassic">CASIO Classic</option>
 <option value="airplaneChime">Airplane Chime</option>
 <option value="echoedChime">Echoed Chime</option>
@@ -2692,7 +2707,10 @@ body.pseudo-fullscreen #app {
 <option value="classic2">Klasszikus 2</option>
         </select></label>
 <label>Hang kiválasztása az eszközről<input id="customSoundInput" type="file" accept="audio/*"></label>
-<button id="customSoundTest" type="button" class="secondary-button">Kiválasztott hang lejátszása</button>
+<div class="manual-sound-button-row">
+  <button id="customSoundTest" type="button" class="secondary-button">Kiválasztott hang lejátszása</button>
+  <button id="customSoundDelete" type="button" class="secondary-button">Kiválasztott hang törlése</button>
+</div>
 <h4>Napok</h4><div class="schedule-grid days-grid"><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="1" checked><span>H</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="2" checked><span>K</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="3" checked><span>SZ</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="4" checked><span>CS</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="5" checked><span>P</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="6" checked><span>SZ</span></label><label class="schedule-check"><input class="chime-day" type="checkbox" data-day="0" checked><span>V</span></label></div>
 <h4>Órák</h4><div class="schedule-grid hours-grid"><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="0" ><span>00</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="1" ><span>01</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="2" ><span>02</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="3" ><span>03</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="4" ><span>04</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="5" ><span>05</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="6" ><span>06</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="7" ><span>07</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="8" checked><span>08</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="9" checked><span>09</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="10" checked><span>10</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="11" checked><span>11</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="12" checked><span>12</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="13" checked><span>13</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="14" checked><span>14</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="15" checked><span>15</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="16" checked><span>16</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="17" checked><span>17</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="18" checked><span>18</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="19" checked><span>19</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="20" checked><span>20</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="21" checked><span>21</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="22" checked><span>22</span></label><label class="schedule-check"><input class="chime-hour" type="checkbox" data-hour="23" ><span>23</span></label></div>
 </section>
@@ -2874,6 +2892,7 @@ const nightBrightnessValue = document.getElementById("nightBrightnessValue");
 const beepVolumeValue = document.getElementById("beepVolumeValue");
 
 const customSoundTest = document.getElementById("customSoundTest");
+const customSoundDelete = document.getElementById("customSoundDelete");
 const audioHint = document.getElementById("audioHint");
 
 let audioContext = null;
@@ -3312,10 +3331,12 @@ function v43PlayManualSound() {
 }
 
 function v43PlaySelectedSound() {
-  if (v43HasManualSound()) return v43PlayManualSound();
-
   const selected = (settings && settings.beepSound) ? settings.beepSound : "none";
-  if (selected === "none") return false;
+
+  /* v59: list sound has priority. Manual file is used only with No List Sound. */
+  if (selected === "none") {
+    return v43HasManualSound() ? v43PlayManualSound() : false;
+  }
 
   if (selected === "casioClassic") {
     return playEmbeddedCasioClassic();
@@ -4573,18 +4594,33 @@ customSoundInput.addEventListener("change", () => {
   const file = customSoundInput.files && customSoundInput.files[0];
   if (!file) return;
 
-  if (customSoundAudio) {
-    customSoundAudio.pause();
-    customSoundAudio.currentTime = 0;
-    customSoundAudio = null;
-  }
-  if (customSoundObjectUrl) {
-    URL.revokeObjectURL(customSoundObjectUrl);
-    customSoundObjectUrl = null;
-  }
+  try {
+    if (customSoundAudio) {
+      customSoundAudio.pause();
+      customSoundAudio.currentTime = 0;
+    }
+  } catch (_) {}
+  try {
+    if (v43ManualAudio) {
+      v43ManualAudio.pause();
+      v43ManualAudio.currentTime = 0;
+    }
+  } catch (_) {}
+  try {
+    if (customSoundObjectUrl) URL.revokeObjectURL(customSoundObjectUrl);
+  } catch (_) {}
+  try {
+    if (v43ManualAudioUrl && v43ManualAudioUrl !== customSoundObjectUrl) {
+      URL.revokeObjectURL(v43ManualAudioUrl);
+    }
+  } catch (_) {}
 
   customSoundObjectUrl = URL.createObjectURL(file);
   customSoundAudio = new Audio(customSoundObjectUrl);
+  customSoundAudio.preload = "auto";
+  v43ManualAudioUrl = customSoundObjectUrl;
+  v43ManualAudio = customSoundAudio;
+
   customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
@@ -4614,6 +4650,36 @@ customSoundTest.addEventListener("click", async () => {
   } catch (e) {
     console.warn("Egyéni hang lejátszási hiba:", e);
   }
+});
+
+customSoundDelete.addEventListener("click", () => {
+  try {
+    if (customSoundAudio) {
+      customSoundAudio.pause();
+      customSoundAudio.currentTime = 0;
+    }
+  } catch (_) {}
+  try {
+    if (v43ManualAudio && v43ManualAudio !== customSoundAudio) {
+      v43ManualAudio.pause();
+      v43ManualAudio.currentTime = 0;
+    }
+  } catch (_) {}
+  try {
+    if (customSoundObjectUrl) URL.revokeObjectURL(customSoundObjectUrl);
+  } catch (_) {}
+  try {
+    if (v43ManualAudioUrl && v43ManualAudioUrl !== customSoundObjectUrl) {
+      URL.revokeObjectURL(v43ManualAudioUrl);
+    }
+  } catch (_) {}
+
+  customSoundAudio = null;
+  customSoundObjectUrl = null;
+  v43ManualAudio = null;
+  v43ManualAudioUrl = null;
+  try { customSoundInput.value = ""; } catch (_) {}
+  customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
 beepSound.addEventListener("change", () => {
@@ -4665,45 +4731,6 @@ calendarWeekFontFamily.addEventListener("change",()=>{settings.calendarWeekFontF
 
 
 (function () {
-  const input = document.getElementById("customSoundInput");
-  const testBtn = document.getElementById("customSoundTest");
-  const sel = document.getElementById("beepSound");
-
-  if (input) {
-    input.addEventListener("change", function () {
-      const file = input.files && input.files[0];
-      if (!file) return;
-
-      try {
-        if (v43ManualAudioUrl) URL.revokeObjectURL(v43ManualAudioUrl);
-      } catch (e) {}
-
-      try {
-        v43ManualAudioUrl = URL.createObjectURL(file);
-        v43ManualAudio = new Audio(v43ManualAudioUrl);
-        v43ManualAudio.preload = "auto";
-      } catch (e) {
-        v43ManualAudio = null;
-        v43ManualAudioUrl = null;
-      }
-      v43UnlockAudio();
-    });
-  }
-
-  if (testBtn) {
-    testBtn.addEventListener("click", function () {
-      v43UnlockAudio();
-      setTimeout(function () { v43PlaySelectedSound(); }, 0);
-    });
-  }
-
-  if (sel) {
-    sel.addEventListener("change", function () {
-      v43UnlockAudio();
-      setTimeout(function () { v43PlaySelectedSound(); }, 0);
-    });
-  }
-
   ["pointerdown", "touchstart", "click"].forEach(function (evt) {
     document.addEventListener(evt, v43UnlockAudio, { once: true, passive: true });
   });
@@ -5021,7 +5048,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=58", { updateViaCache: "none" })
+      .register("./service-worker.js?v=59", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
