@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
+  <meta name="apple-mobile-web-app-title" content="WallClock">
+  <link rel="manifest" href="./manifest.json">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#000000" />
@@ -1100,6 +1102,155 @@ body.pseudo-fullscreen #app {
 
 /* Because all display elements are absolute, hiding one never reflows another. */
 
+
+/* v44 – very faint transparent floating controls */
+#androidControls #fullscreenButton,
+#androidControls #settingsButton,
+#fullscreenButton,
+#settingsButton {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: rgba(255,255,255,0.07) !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: none !important;
+  transition: color .18s ease, transform .18s ease !important;
+}
+#androidControls #fullscreenButton:hover,
+#androidControls #settingsButton:hover,
+#androidControls #fullscreenButton:focus,
+#androidControls #settingsButton:focus,
+#androidControls #fullscreenButton:active,
+#androidControls #settingsButton:active,
+#fullscreenButton:hover,
+#settingsButton:hover,
+#fullscreenButton:focus,
+#settingsButton:focus,
+#fullscreenButton:active,
+#settingsButton:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: rgba(255,255,255,0.22) !important;
+  box-shadow: none !important;
+}
+#androidControls #fullscreenButton:active,
+#androidControls #settingsButton:active,
+#fullscreenButton:active,
+#settingsButton:active {
+  transform: scale(.94) !important;
+}
+
+
+/* v46 – smoother weather icon animations for older iPad Safari */
+.weather-icon {
+  /* SVG filter/drop-shadow on the whole animated icon is expensive on old Safari */
+  filter: none !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  contain: layout paint style;
+}
+
+.weather-icon svg {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.weather-icon .cloud-body,
+.weather-icon .sun-core,
+.weather-icon .sun-rays,
+.weather-icon .moon-body,
+.weather-icon .moon-glow,
+.weather-icon .night-stars,
+.weather-icon .rain-drop,
+.weather-icon .snow-flake,
+.weather-icon .fog-line {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.weather-icon .cloud-body {
+  animation: cloudFloatV46 5s ease-in-out infinite !important;
+}
+
+.weather-icon .sun-core {
+  animation: sunPulseV46 3.8s ease-in-out infinite !important;
+}
+
+.weather-icon .sun-rays {
+  animation: sunRotateV46 18s linear infinite !important;
+}
+
+.weather-icon .moon-body {
+  transform-origin: center;
+  animation: moonFloatV46 5.8s ease-in-out infinite;
+}
+
+.weather-icon .moon-glow {
+  transform-origin: center;
+  animation: moonGlowV46 4.2s ease-in-out infinite;
+}
+
+.weather-icon .night-stars {
+  transform-origin: center;
+  animation: starTwinkleV46 3.6s ease-in-out infinite;
+}
+
+.weather-icon .rain-drop {
+  animation: rainFallV46 1.25s linear infinite !important;
+}
+
+.weather-icon .snow-flake {
+  animation: snowFallV46 2.8s linear infinite !important;
+}
+
+.weather-icon .fog-line {
+  animation: fogSlideV46 4.2s ease-in-out infinite alternate !important;
+}
+
+@keyframes cloudFloatV46 {
+  0%,100% { transform: translate3d(-1px,0,0); }
+  50% { transform: translate3d(2px,-2px,0); }
+}
+@keyframes sunPulseV46 {
+  0%,100% { transform: translateZ(0) scale(1); opacity:.96; }
+  50% { transform: translateZ(0) scale(1.045); opacity:1; }
+}
+@keyframes sunRotateV46 {
+  from { transform: translateZ(0) rotate(0deg); }
+  to { transform: translateZ(0) rotate(360deg); }
+}
+@keyframes moonFloatV46 {
+  0%,100% { transform: translate3d(0,1px,0) rotate(-2deg); }
+  50% { transform: translate3d(0,-2px,0) rotate(2deg); }
+}
+@keyframes moonGlowV46 {
+  0%,100% { transform: translateZ(0) scale(.96); opacity:.22; }
+  50% { transform: translateZ(0) scale(1.05); opacity:.38; }
+}
+@keyframes starTwinkleV46 {
+  0%,100% { opacity:.45; transform:translateZ(0) scale(.96); }
+  50% { opacity:1; transform:translateZ(0) scale(1.04); }
+}
+@keyframes rainFallV46 {
+  0% { transform:translate3d(0,-3px,0); opacity:0; }
+  22% { opacity:1; }
+  100% { transform:translate3d(-2px,12px,0); opacity:0; }
+}
+@keyframes snowFallV46 {
+  0% { transform:translate3d(0,-3px,0) rotate(0deg); opacity:0; }
+  20% { opacity:1; }
+  100% { transform:translate3d(2px,13px,0) rotate(160deg); opacity:0; }
+}
+@keyframes fogSlideV46 {
+  from { transform:translate3d(-2px,0,0); opacity:.65; }
+  to { transform:translate3d(3px,0,0); opacity:.95; }
+}
+
 </style>
 </head>
 <body>
@@ -1135,7 +1286,7 @@ body.pseudo-fullscreen #app {
       <div id="weatherText" class="weather-text">Időjárás betöltése…</div>
     </section>
 <section id="calendarWeek" class="calendar-week text-backdrop" aria-label="Calendar Week">
-  <span id="calendarWeekText">CW35</span>
+  <span id="calendarWeekText">cw35</span>
 </section>
 <div id="audioHint" class="audio-hint">
       Érintsd meg egyszer a képernyőt a hang engedélyezéséhez
@@ -2006,7 +2157,7 @@ body.pseudo-fullscreen #app {
   <div class="subgroup"><h4>Karakterbeállítás</h4>
     <label>Karakterszélesség <span id="calendarWeekFontScaleXValue">100%</span><input id="calendarWeekFontScaleX" type="range" min="50" max="160" step="1" value="100"></label>
     <label>Karaktermagasság <span id="calendarWeekFontScaleYValue">100%</span><input id="calendarWeekFontScaleY" type="range" min="50" max="160" step="1" value="100"></label>
-    <label>Mérete <span id="calendarWeekSizeValue">100%</span><input id="calendarWeekSize" type="range" min="50" max="180" step="1" value="100"></label>
+    <label>Mérete <span id="calendarWeekSizeValue">100%</span><input id="calendarWeekSize" type="range" min="50" max="300" step="1" value="100"></label>
     <label>H-pozíció <span id="calendarWeekXValue">0 px</span><input id="calendarWeekX" type="range" min="-500" max="500" step="1" value="0"></label>
     <label>V-pozíció <span id="calendarWeekYValue">0 px</span><input id="calendarWeekY" type="range" min="-40" max="40" step="1" value="0"></label>
   </div>
@@ -2442,10 +2593,14 @@ function updateCalendarWeek(now = new Date()) {
 function updateClock() {
   updateCalendarWeek(new Date());
   const now = new Date();
-  dateEl.textContent = formatDate(now);
-  weekdayEl.textContent = HUNGARIAN_WEEKDAYS[now.getDay()];
-  hoursEl.textContent = pad2(now.getHours());
-  minutesEl.textContent = pad2(now.getMinutes());
+  const newDateText = formatDate(now);
+  const newWeekdayText = HUNGARIAN_WEEKDAYS[now.getDay()];
+  const newHoursText = pad2(now.getHours());
+  const newMinutesText = pad2(now.getMinutes());
+  if (dateEl.textContent !== newDateText) dateEl.textContent = newDateText;
+  if (weekdayEl.textContent !== newWeekdayText) weekdayEl.textContent = newWeekdayText;
+  if (hoursEl.textContent !== newHoursText) hoursEl.textContent = newHoursText;
+  if (minutesEl.textContent !== newMinutesText) minutesEl.textContent = newMinutesText;
   const sec = now.getSeconds();
   const ms = now.getMilliseconds();
   if (settings.secondsFormat === "TENTH") {
@@ -2634,13 +2789,62 @@ function playEmbeddedCasioClassic() {
   return true;
 }
 
+
+let v43ManualAudio = null;
+let v43ManualAudioUrl = null;
+
+function v43UnlockAudio() {
+  try {
+    if (typeof audioCtx !== "undefined" && audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+  } catch (e) {}
+}
+
+function v43HasManualSound() {
+  return !!(v43ManualAudio && v43ManualAudio.src);
+}
+
+function v43PlayManualSound() {
+  if (!v43HasManualSound()) return false;
+  try {
+    v43ManualAudio.pause();
+    v43ManualAudio.currentTime = 0;
+    const p = v43ManualAudio.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function v43PlaySelectedSound() {
+  if (v43HasManualSound()) return v43PlayManualSound();
+
+  const selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+  if (selected === "none") return false;
+
+  if (selected === "casioClassic") {
+    return playEmbeddedCasioClassic();
+  }
+
+  if (typeof EMBEDDED_CHIME_KEYS !== "undefined" && EMBEDDED_CHIME_KEYS.has(selected)) {
+    return playEmbeddedChimeByKey(selected);
+  }
+
+  return null;
+}
+
 function playOneBeep(startTime) {
+  const v43Result = v43PlaySelectedSound();
+  if (v43Result === true || v43Result === false) return;
+
   if (EMBEDDED_CHIME_KEYS.has(settings.beepSound)) {
     playEmbeddedChimeByKey(settings.beepSound);
     return;
   }
 
-  if (settings.beepSound === "none") return;
+  if (settings.beepSound === "none" && !v43HasManualSound()) return;
   if (settings.beepSound === "casioClassic") {
     playEmbeddedCasioClassic();
     return;
@@ -2830,12 +3034,15 @@ function playOneBeep(startTime) {
 }
 
 function playDoubleBeep() {
+  const v43Result = v43PlaySelectedSound();
+  if (v43Result === true || v43Result === false) return;
+
   if (EMBEDDED_CHIME_KEYS.has(settings.beepSound)) {
     playEmbeddedChimeByKey(settings.beepSound);
     return;
   }
 
-  if (settings.beepSound === "none") return;
+  if (settings.beepSound === "none" && !v43HasManualSound()) return;
   if (settings.beepSound === "casioClassic") {
     playEmbeddedCasioClassic();
     return;
@@ -2861,106 +3068,130 @@ function maybeHourlyChime(now) {
 }
 
 function iconSVG(type) {
+  /* v46: no SVG blur/drop-shadow filters; old iPad Safari renders these much smoother */
   const defs = `
     <defs>
       <linearGradient id="sunG" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#fff27a"/>
-        <stop offset="52%" stop-color="#ffbf3f"/>
-        <stop offset="100%" stop-color="#ff7f32"/>
+        <stop offset="0%" stop-color="#fff58a"/>
+        <stop offset="55%" stop-color="#ffc54d"/>
+        <stop offset="100%" stop-color="#ff8b3d"/>
       </linearGradient>
-      <radialGradient id="sunGlow">
-        <stop offset="0%" stop-color="#fff8a8" stop-opacity="0.95"/>
-        <stop offset="100%" stop-color="#ffb13b" stop-opacity="0.15"/>
+      <radialGradient id="moonG">
+        <stop offset="0%" stop-color="#fffef0"/>
+        <stop offset="68%" stop-color="#e8efff"/>
+        <stop offset="100%" stop-color="#aebdde"/>
       </radialGradient>
-      <linearGradient id="cloudG" x1="0" y1="0" x2="0.9" y2="1">
+      <radialGradient id="moonHalo">
+        <stop offset="0%" stop-color="#bfd4ff" stop-opacity=".42"/>
+        <stop offset="100%" stop-color="#8eb5ff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="cloudG" x1="0" y1="0" x2=".9" y2="1">
         <stop offset="0%" stop-color="#ffffff"/>
-        <stop offset="45%" stop-color="#dfe9f3"/>
+        <stop offset="48%" stop-color="#dfe9f3"/>
         <stop offset="100%" stop-color="#8fa6ba"/>
       </linearGradient>
-      <linearGradient id="cloudDarkG" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#b8c9d8"/>
-        <stop offset="100%" stop-color="#61798e"/>
+      <linearGradient id="cloudNightG" x1="0" y1="0" x2=".9" y2="1">
+        <stop offset="0%" stop-color="#adbcd0"/>
+        <stop offset="55%" stop-color="#6f829c"/>
+        <stop offset="100%" stop-color="#3b4c67"/>
       </linearGradient>
       <linearGradient id="rainG" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#74d5ff"/>
-        <stop offset="100%" stop-color="#248cff"/>
+        <stop offset="0%" stop-color="#7cddff"/>
+        <stop offset="100%" stop-color="#2d8cff"/>
       </linearGradient>
       <linearGradient id="snowG" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stop-color="#ffffff"/>
         <stop offset="100%" stop-color="#a8dcff"/>
       </linearGradient>
       <linearGradient id="fogG" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#8fa7b9" stop-opacity=".35"/>
-        <stop offset="50%" stop-color="#e5eef5" stop-opacity=".95"/>
-        <stop offset="100%" stop-color="#8fa7b9" stop-opacity=".35"/>
+        <stop offset="0%" stop-color="#8fa7b9" stop-opacity=".3"/>
+        <stop offset="50%" stop-color="#e5eef5" stop-opacity=".92"/>
+        <stop offset="100%" stop-color="#8fa7b9" stop-opacity=".3"/>
       </linearGradient>
-      <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#000000" flood-opacity=".35"/>
-      </filter>
-      <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
-        <feGaussianBlur stdDeviation="2.6" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
     </defs>`;
 
   const sun = `
-    <g class="sun-rays" opacity=".88">
+    <g class="sun-rays" opacity=".9">
       <g stroke="#ffc34d" stroke-width="3.2" stroke-linecap="round">
         <path d="M32 5v7"/><path d="M32 52v7"/><path d="M5 32h7"/><path d="M52 32h7"/>
         <path d="M12.9 12.9l5 5"/><path d="M46.1 46.1l5 5"/>
         <path d="M51.1 12.9l-5 5"/><path d="M17.9 46.1l-5 5"/>
       </g>
     </g>
-    <circle cx="32" cy="32" r="16" fill="url(#sunGlow)" opacity=".42"/>
-    <circle class="sun-core" cx="32" cy="32" r="11.5" fill="url(#sunG)" filter="url(#glow)"/>`;
+    <circle cx="32" cy="32" r="15.5" fill="#ffc44a" opacity=".16"/>
+    <circle class="sun-core" cx="32" cy="32" r="11.5" fill="url(#sunG)"/>`;
 
-  const cloud = `
-    <g class="cloud-body" filter="url(#softShadow)">
-      <path d="M17 45.5h29.5c6.3 0 10.5-4.2 10.5-9.6 0-5-3.8-9-9-9.5C46.2 19.7 40.4 15 33.3 15c-7.4 0-13.5 5.1-15 12-6.4.2-11.3 4.2-11.3 9.4 0 5.3 4.2 9.1 10 9.1z" fill="url(#cloudG)"/>
-      <path d="M17 45.5h29.5c6.3 0 10.5-4.2 10.5-9.6 0-1.5-.3-2.8-.9-4.1-2.5 6-8.2 8.4-14.3 8.4H19.5c-5.4 0-9.5-1.7-11.7-4.4-.5 6 3.9 9.7 9.2 9.7z" fill="url(#cloudDarkG)" opacity=".33"/>
-      <ellipse cx="30" cy="25" rx="11" ry="6" fill="#ffffff" opacity=".28"/>
+  const moon = `
+    <g class="night-stars" fill="#d9e8ff">
+      <circle cx="11" cy="14" r="1.15"/>
+      <circle cx="49" cy="10" r=".9"/>
+      <circle cx="55" cy="27" r="1.1"/>
+      <circle cx="17" cy="49" r=".8"/>
+    </g>
+    <circle class="moon-glow" cx="32" cy="31" r="23" fill="url(#moonHalo)"/>
+    <g class="moon-body">
+      <circle cx="31" cy="31" r="14" fill="url(#moonG)"/>
+      <circle cx="37" cy="26" r="13" fill="#18233c"/>
+      <circle cx="24" cy="27" r="1.4" fill="#cbd7ed" opacity=".45"/>
+      <circle cx="26" cy="37" r="1.8" fill="#cbd7ed" opacity=".35"/>
     </g>`;
 
-  const partly = `
-    <g transform="translate(-5,-7)">${sun}</g>
-    <g transform="translate(3,5)">${cloud}</g>`;
+  const cloud = `
+    <g class="cloud-body">
+      <path d="M17 45.5h29.5c6.3 0 10.5-4.2 10.5-9.6 0-5-3.8-9-9-9.5C46.2 19.7 40.4 15 33.3 15c-7.4 0-13.5 5.1-15 12-6.4.2-11.3 4.2-11.3 9.4 0 5.3 4.2 9.1 10 9.1z" fill="url(#cloudG)"/>
+      <path d="M17 45.5h29.5c6.3 0 10.5-4.2 10.5-9.6 0-1.5-.3-2.8-.9-4.1-2.5 6-8.2 8.4-14.3 8.4H19.5c-5.4 0-9.5-1.7-11.7-4.4-.5 6 3.9 9.7 9.2 9.7z" fill="#70869a" opacity=".24"/>
+      <ellipse cx="30" cy="25" rx="11" ry="6" fill="#fff" opacity=".25"/>
+    </g>`;
 
-  const rain = `
-    ${cloud}
+  const nightCloud = `
+    <g class="cloud-body">
+      <path d="M17 45.5h29.5c6.3 0 10.5-4.2 10.5-9.6 0-5-3.8-9-9-9.5C46.2 19.7 40.4 15 33.3 15c-7.4 0-13.5 5.1-15 12-6.4.2-11.3 4.2-11.3 9.4 0 5.3 4.2 9.1 10 9.1z" fill="url(#cloudNightG)"/>
+      <ellipse cx="29" cy="25" rx="10" ry="5" fill="#d6e5ff" opacity=".13"/>
+    </g>`;
+
+  const partly = `<g transform="translate(-5,-7)">${sun}</g><g transform="translate(3,5)">${cloud}</g>`;
+  const nightPartly = `<g transform="translate(-7,-8) scale(.9)">${moon}</g><g transform="translate(4,7)">${nightCloud}</g>`;
+
+  const rainDrops = `
     <g stroke="url(#rainG)" stroke-width="3.6" stroke-linecap="round">
       <path class="rain-drop" d="M21 49l-3 7"/>
       <path class="rain-drop" d="M33 49l-3 7"/>
       <path class="rain-drop" d="M45 49l-3 7"/>
     </g>`;
 
-  const snow = `
-    ${cloud}
+  const snowFlakes = `
     <g fill="url(#snowG)" stroke="#dff4ff" stroke-width=".8">
       <text class="snow-flake" x="18" y="57" font-size="12">✦</text>
       <text class="snow-flake" x="31" y="57" font-size="12">✦</text>
       <text class="snow-flake" x="44" y="57" font-size="12">✦</text>
     </g>`;
 
-  const fog = `
+  const fogLines = `
     <g opacity=".92">
       <path class="fog-line" d="M11 23h42" stroke="url(#fogG)" stroke-width="6" stroke-linecap="round"/>
       <path class="fog-line" d="M7 34h50" stroke="url(#fogG)" stroke-width="6" stroke-linecap="round" style="animation-delay:.4s"/>
       <path class="fog-line" d="M14 45h36" stroke="url(#fogG)" stroke-width="6" stroke-linecap="round" style="animation-delay:.8s"/>
     </g>`;
 
-  const storm = `
-    ${cloud}
+  const lightning = `
     <path class="lightning" d="M35 45l-8 10h7l-5 9 15-14h-8l5-5z"
-      fill="#ffe85f" stroke="#fff6a3" stroke-width="1.2" filter="url(#glow)"/>`;
+      fill="#ffe85f" stroke="#fff6a3" stroke-width="1.2"/>`;
 
   const body = {
-    sun,
-    cloud,
-    partly,
-    rain,
-    snow,
-    fog,
-    storm
+    sun: sun,
+    moon: moon,
+    cloud: cloud,
+    nightCloud: nightCloud,
+    partly: partly,
+    nightPartly: nightPartly,
+    rain: cloud + rainDrops,
+    nightRain: `<g transform="translate(-9,-10) scale(.72)">${moon}</g>${nightCloud}${rainDrops}`,
+    snow: cloud + snowFlakes,
+    nightSnow: `<g transform="translate(-9,-10) scale(.72)">${moon}</g>${nightCloud}${snowFlakes}`,
+    fog: fogLines,
+    nightFog: `<g transform="translate(-8,-12) scale(.78)">${moon}</g>${fogLines}`,
+    storm: cloud + lightning,
+    nightStorm: `<g transform="translate(-9,-10) scale(.72)">${moon}</g>${nightCloud}${lightning}`
   }[type] || cloud;
 
   return `<svg viewBox="0 0 64 64" role="img" aria-hidden="true">${defs}${body}</svg>`;
@@ -3000,46 +3231,58 @@ function getNearestHourlyWeather(data) {
 }
 
 function weatherDescription(code, cloudCover = null, isDay = 1, dni = null, sunshineDuration = null, shortwave = null) {
-  if ([45,48].includes(code)) return { text: "Ködös", icon: "fog" };
-  if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return { text: "Esős", icon: "rain" };
-  if ([71,73,75,77,85,86].includes(code)) return { text: "Havas", icon: "snow" };
-  if ([95,96,99].includes(code)) return { text: "Zivatar", icon: "storm" };
+  const daytime = Number(isDay) === 1;
+
+  if ([45,48].includes(code)) return { text: "Ködös", icon: daytime ? "fog" : "nightFog" };
+  if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return { text: "Esős", icon: daytime ? "rain" : "nightRain" };
+  if ([71,73,75,77,85,86].includes(code)) return { text: "Havas", icon: daytime ? "snow" : "nightSnow" };
+  if ([95,96,99].includes(code)) return { text: "Zivatar", icon: daytime ? "storm" : "nightStorm" };
 
   const cc = Number(cloudCover);
   const dniValue = Number(dni);
   const sunSec = Number(sunshineDuration);
   const shortwaveValue = Number(shortwave);
-  const daytime = Number(isDay) === 1;
 
-  // Strongest signal: DWD/Open-Meteo reports actual modeled sunshine duration
-  // for the 15-minute interval. Any meaningful sunshine should prevent "cloudy".
-  if (daytime && Number.isFinite(sunSec) && sunSec >= 120) {
+  /* At night sunshine/radiation signals must never select a sun icon. */
+  if (!daytime) {
+    if (Number.isFinite(cc)) {
+      if (cc < 20) return { text: "Derült éjszaka", icon: "moon" };
+      if (cc < 50) return { text: "Enyhén felhős", icon: "nightPartly" };
+      if (cc < 80) return { text: "Részben felhős", icon: "nightPartly" };
+      if (cc < 95) return { text: "Erősen felhős", icon: "nightCloud" };
+      return { text: "Borult", icon: "nightCloud" };
+    }
+    if (code === 0) return { text: "Derült éjszaka", icon: "moon" };
+    if (code === 1 || code === 2) return { text: "Részben felhős", icon: "nightPartly" };
+    if (code === 3) return { text: "Borult", icon: "nightCloud" };
+    return { text: "Változóan felhős", icon: "nightPartly" };
+  }
+
+  if (Number.isFinite(sunSec) && sunSec >= 120) {
     if (Number.isFinite(cc) && cc < 35) return { text: "Napos", icon: "sun" };
     if (Number.isFinite(cc) && cc < 70) return { text: "Napos, gomolyfelhőkkel", icon: "partly" };
     return { text: "Napos felhőátvonulásokkal", icon: "partly" };
   }
 
-  // WMO sunshine threshold based on DNI.
-  if (daytime && Number.isFinite(dniValue) && dniValue > 120) {
+  if (Number.isFinite(dniValue) && dniValue > 120) {
     if (Number.isFinite(cc) && cc < 35) return { text: "Napos", icon: "sun" };
     return { text: "Részben napos", icon: "partly" };
   }
 
-  // Secondary radiation sanity check.
-  if (daytime && Number.isFinite(shortwaveValue) && shortwaveValue > 300) {
+  if (Number.isFinite(shortwaveValue) && shortwaveValue > 300) {
     if (!Number.isFinite(cc) || cc < 75) return { text: "Részben napos", icon: "partly" };
   }
 
   if (Number.isFinite(cc)) {
-    if (cc < 20) return { text: daytime ? "Derült" : "Tiszta", icon: daytime ? "sun" : "partly" };
-    if (cc < 45) return { text: daytime ? "Többnyire napos" : "Enyhén felhős", icon: "partly" };
+    if (cc < 20) return { text: "Derült", icon: "sun" };
+    if (cc < 45) return { text: "Többnyire napos", icon: "partly" };
     if (cc < 70) return { text: "Részben felhős", icon: "partly" };
     if (cc < 90) return { text: "Erősen felhős", icon: "cloud" };
     return { text: "Borult", icon: "cloud" };
   }
 
-  if (code === 0) return { text: daytime ? "Derült" : "Tiszta", icon: daytime ? "sun" : "partly" };
-  if (code === 1) return { text: daytime ? "Többnyire napos" : "Enyhén felhős", icon: "partly" };
+  if (code === 0) return { text: "Derült", icon: "sun" };
+  if (code === 1) return { text: "Többnyire napos", icon: "partly" };
   if (code === 2) return { text: "Részben felhős", icon: "partly" };
   if (code === 3) return { text: "Borult", icon: "cloud" };
   return { text: "Változó", icon: "partly" };
@@ -3567,6 +3810,52 @@ calendarWeekX.addEventListener("input",()=>{settings.calendarWeekX=Number(calend
 calendarWeekY.addEventListener("input",()=>{settings.calendarWeekY=Number(calendarWeekY.value);localStorage.setItem("calendarWeekY",String(settings.calendarWeekY));applySettingsToUI();});
 
 
+
+
+(function () {
+  const input = document.getElementById("customSoundInput");
+  const testBtn = document.getElementById("customSoundTest");
+  const sel = document.getElementById("beepSound");
+
+  if (input) {
+    input.addEventListener("change", function () {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      try {
+        if (v43ManualAudioUrl) URL.revokeObjectURL(v43ManualAudioUrl);
+      } catch (e) {}
+
+      try {
+        v43ManualAudioUrl = URL.createObjectURL(file);
+        v43ManualAudio = new Audio(v43ManualAudioUrl);
+        v43ManualAudio.preload = "auto";
+      } catch (e) {
+        v43ManualAudio = null;
+        v43ManualAudioUrl = null;
+      }
+      v43UnlockAudio();
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", function () {
+      v43UnlockAudio();
+      setTimeout(function () { v43PlaySelectedSound(); }, 0);
+    });
+  }
+
+  if (sel) {
+    sel.addEventListener("change", function () {
+      v43UnlockAudio();
+      setTimeout(function () { v43PlaySelectedSound(); }, 0);
+    });
+  }
+
+  ["pointerdown", "touchstart", "click"].forEach(function (evt) {
+    document.addEventListener(evt, v43UnlockAudio, { once: true, passive: true });
+  });
+})();
 </script>
 <script>
 window.addEventListener("DOMContentLoaded", function () {
@@ -3866,6 +4155,56 @@ window.addEventListener("DOMContentLoaded", function () {
 
   /* Run after the original settings initialization has finished. */
   setTimeout(init, 0);
+})();
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  });
+}
+</script>
+
+<script>
+/* v45 – iOS/iPadOS zoom tiltás */
+(function(){
+  ["gesturestart","gesturechange","gestureend"].forEach(function(type){
+    document.addEventListener(type,function(e){e.preventDefault();},{passive:false});
+  });
+  let lastTouchEnd=0;
+  document.addEventListener("touchend",function(e){
+    const now=Date.now();
+    if(now-lastTouchEnd<=300)e.preventDefault();
+    lastTouchEnd=now;
+  },{passive:false});
+})();
+</script>
+
+
+<script>
+/* v47 – Calendar Week larger size range + lowercase cw prefix */
+(function () {
+  function patchCalendarWeek() {
+    const sizeSlider =
+      document.getElementById("calendarWeekSize") ||
+      document.querySelector('input[id*="calendar"][id*="Size" i]') ||
+      document.querySelector('input[id*="week"][id*="Size" i]');
+    if (sizeSlider && sizeSlider.type === "range") {
+      sizeSlider.max = "300";
+    }
+
+    const weekEl =
+      document.getElementById("calendarWeek") ||
+      document.querySelector('[id*="calendarWeek"]');
+    if (weekEl && /^CW\d+$/i.test((weekEl.textContent || "").trim())) {
+      weekEl.textContent = weekEl.textContent.replace(/^CW/i, "cw");
+    }
+  }
+
+  patchCalendarWeek();
+  setInterval(patchCalendarWeek, 1000);
 })();
 </script>
 

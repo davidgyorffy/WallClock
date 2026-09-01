@@ -1,0 +1,10 @@
+{
+  "name": "WallClock",
+  "short_name": "WallClock",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "landscape"
+}
