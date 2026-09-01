@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=62">
+  <link rel="manifest" href="./manifest.json?v=63">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1648,9 +1648,32 @@ body.pseudo-fullscreen #app {
   margin:0 !important;
 }
 
+
+/* v63 – wider CLOCK SETUP and easier touch sliders */
+.settings-panel{width:min(570px,calc(100vw - 24px))!important;right:12px!important;bottom:12px!important;max-height:calc(100vh - 24px)!important;padding:24px 26px!important}
+.settings-panel input[type="range"]{-webkit-appearance:none!important;appearance:none!important;display:block!important;width:100%!important;min-height:52px!important;height:52px!important;box-sizing:border-box!important;padding:18px 0!important;margin:4px 0 2px!important;background:transparent!important;outline:none!important;touch-action:none!important}
+.settings-panel input[type="range"]::-webkit-slider-runnable-track{height:8px!important;border-radius:999px!important;background:rgba(255,255,255,.26)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)!important}
+.settings-panel input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none!important;appearance:none!important;width:32px!important;height:32px!important;margin-top:-12px!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.95)!important;background:#f4f4f4!important;box-shadow:0 2px 10px rgba(0,0,0,.75),0 0 0 5px rgba(255,255,255,.10)!important}
+.settings-panel input[type="range"]::-moz-range-track{height:8px!important;border-radius:999px!important;background:rgba(255,255,255,.26)!important}
+.settings-panel input[type="range"]::-moz-range-thumb{width:32px!important;height:32px!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.95)!important;background:#f4f4f4!important}
+.sound-volume-control{margin-top:18px!important;margin-bottom:14px!important}.sound-volume-control>span{float:right;opacity:.82}
+
+.gamma-radiation{--gamma-x:0px;--gamma-y:0px;--gamma-scale:1;--gamma-font-x:1;--gamma-font-y:1;--gamma-icon-size:72px;position:absolute;left:50%;top:78%;z-index:4;display:flex;align-items:center;gap:13px;color:#fff;font-family:"Jozsika Light",Arial,Helvetica,sans-serif;font-size:clamp(22px,3vw,42px);white-space:nowrap;transform:translate(-50%,-50%) translate(var(--gamma-x),var(--gamma-y)) scale(var(--gamma-scale));transform-origin:center;pointer-events:none}
+.gamma-reading{display:inline-flex;align-items:baseline;gap:.22em;transform:scale(var(--gamma-font-x),var(--gamma-font-y));transform-origin:left center;font-variant-numeric:tabular-nums}.gamma-unit{font-size:.56em;opacity:.82;letter-spacing:.03em}
+.gamma-icon{width:var(--gamma-icon-size);height:var(--gamma-icon-size);flex:0 0 var(--gamma-icon-size);border-radius:50%;perspective:550px;transform-style:preserve-3d;filter:drop-shadow(0 0 8px rgba(255,255,255,.18))}
+.gamma-icon-3d{width:100%;height:100%;border-radius:50%;background-image:url("./gamma_trefoils.png");background-repeat:no-repeat;background-size:300% 200%;transform-style:preserve-3d;animation:gamma3dFloat 5.8s ease-in-out infinite}
+.gamma-green .gamma-icon-3d{background-position:0% 100%}.gamma-yellow .gamma-icon-3d{background-position:50% 0%}.gamma-red .gamma-icon-3d{background-position:100% 100%}
+.gamma-blink-slow{animation:gammaBlinkSlow 2.4s ease-in-out infinite}.gamma-blink-fast{animation:gammaBlinkFast .72s ease-in-out infinite}
+@keyframes gamma3dFloat{0%,100%{transform:rotateX(4deg) rotateY(-8deg) rotateZ(-1deg) translateZ(0) scale(.98)}50%{transform:rotateX(-5deg) rotateY(9deg) rotateZ(1deg) translateZ(16px) scale(1.035)}}
+@keyframes gammaBlinkSlow{0%,100%{opacity:1;filter:drop-shadow(0 0 10px rgba(255,255,255,.18)) brightness(1)}50%{opacity:.28;filter:drop-shadow(0 0 22px rgba(255,255,255,.45)) brightness(1.35)}}
+@keyframes gammaBlinkFast{0%,100%{opacity:1;filter:drop-shadow(0 0 13px rgba(255,255,255,.25)) brightness(1.1)}50%{opacity:.16;filter:drop-shadow(0 0 28px rgba(255,255,255,.55)) brightness(1.55)}}
+.gamma-threshold-note{margin:10px 0 18px;padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.055);font-size:12px;line-height:1.45;opacity:.78}
+.gamma-settings-group>h3{color:#ffe600!important;font-size:19px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important}
+@media(max-width:650px){.settings-panel{width:calc(100vw - 16px)!important;right:8px!important;bottom:8px!important;padding-left:20px!important;padding-right:20px!important}}
+
 </style>
 </head>
-<body data-wallclock-version="62">
+<body data-wallclock-version="63">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1688,6 +1711,12 @@ body.pseudo-fullscreen #app {
       </div>
       <div id="weatherText" class="weather-text">Időjárás betöltése…</div>
     </section>
+
+<section id="gammaRadiation" class="gamma-radiation text-backdrop" aria-label="Gamma háttérsugárzás">
+  <div id="gammaIcon" class="gamma-icon gamma-green" aria-hidden="true"><div class="gamma-icon-3d"></div></div>
+  <div class="gamma-reading"><span id="gammaValue">--</span><span class="gamma-unit">nSv/h</span></div>
+</section>
+
 <section id="calendarWeek" class="calendar-week text-backdrop" aria-label="Calendar Week">
   <span id="calendarWeekText">cw35</span>
 </section>
@@ -1697,7 +1726,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v62</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v63</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2574,6 +2603,180 @@ body.pseudo-fullscreen #app {
   </div>
 </section>
 
+
+<section class="settings-group gamma-settings-group"><h3>GAMMA RADUATION</h3>
+<div class="setting-help">Budapest II. ker. THHE · aktuális gamma-háttérsugárzás · nSv/h · frissítés óránként</div>
+<label class="check-row"><input id="showGamma" type="checkbox" checked><span>Gamma sugárzás kijelzése</span></label>
+<label>Szöveg színe <input id="gammaTextColor" type="color" value="#ffffff"></label>
+<div class="font-select-row"><label>Betűtípus<select id="gammaFontFamily">
+          <option value="Jozsika Light, Arial, Helvetica, sans-serif">Jozsika Light</option>
+          <option value="Jozsika Regular, Arial, Helvetica, sans-serif">Jozsika Regular</option>
+          <option value="Jozsika Semibold, Arial, Helvetica, sans-serif">Jozsika Semibold</option>
+          <option value="Jozsika Bold, Arial, Helvetica, sans-serif">Jozsika Bold</option>
+          <option value="Jozsika ExtraBold, Arial, Helvetica, sans-serif">Jozsika ExtraBold</option>
+
+<option value='Arial, Helvetica, sans-serif'>1. Arial</option>
+<option value='Arial Black, Arial, sans-serif'>2. Arial Black</option>
+<option value='Arial Narrow, Arial, sans-serif'>3. Arial Narrow</option>
+<option value='Helvetica, Arial, sans-serif'>4. Helvetica</option>
+<option value='Helvetica Neue, Helvetica, Arial, sans-serif'>5. Helvetica Neue</option>
+<option value='Verdana, Geneva, sans-serif'>6. Verdana</option>
+<option value='Tahoma, Geneva, sans-serif'>7. Tahoma</option>
+<option value='Trebuchet MS, Arial, sans-serif'>8. Trebuchet MS</option>
+<option value='Gill Sans, Gill Sans MT, sans-serif'>9. Gill Sans</option>
+<option value='Futura, Trebuchet MS, sans-serif'>10. Futura</option>
+<option value='Avenir, Helvetica, sans-serif'>11. Avenir</option>
+<option value='Avenir Next, Avenir, sans-serif'>12. Avenir Next</option>
+<option value='Optima, Segoe UI, sans-serif'>13. Optima</option>
+<option value='Geneva, Tahoma, sans-serif'>14. Geneva</option>
+<option value='Lucida Grande, Lucida Sans Unicode, sans-serif'>15. Lucida Grande</option>
+<option value='Lucida Sans, Lucida Grande, sans-serif'>16. Lucida Sans</option>
+<option value='Century Gothic, AppleGothic, sans-serif'>17. Century Gothic</option>
+<option value='Franklin Gothic Medium, Arial Narrow, sans-serif'>18. Franklin Gothic</option>
+<option value='Segoe UI, Arial, sans-serif'>19. Segoe UI</option>
+<option value='Calibri, Candara, Segoe UI, sans-serif'>20. Calibri</option>
+<option value='Candara, Calibri, Segoe UI, sans-serif'>21. Candara</option>
+<option value='Corbel, Calibri, sans-serif'>22. Corbel</option>
+<option value='Cambria, Georgia, serif'>23. Cambria</option>
+<option value='Constantia, Georgia, serif'>24. Constantia</option>
+<option value='Georgia, Times New Roman, serif'>25. Georgia</option>
+<option value='Times New Roman, Times, serif'>26. Times New Roman</option>
+<option value='Times, serif'>27. Times</option>
+<option value='Palatino Linotype, Book Antiqua, Palatino, serif'>28. Palatino</option>
+<option value='Book Antiqua, Palatino, serif'>29. Book Antiqua</option>
+<option value='Baskerville, Times New Roman, serif'>30. Baskerville</option>
+<option value='Didot, Times New Roman, serif'>31. Didot</option>
+<option value='Hoefler Text, Baskerville, serif'>32. Hoefler Text</option>
+<option value='Rockwell, Courier Bold, serif'>33. Rockwell</option>
+<option value='Copperplate, Copperplate Gothic Light, serif'>34. Copperplate</option>
+<option value='American Typewriter, Georgia, serif'>35. American Typewriter</option>
+<option value='Impact, Haettenschweiler, Arial Narrow Bold, sans-serif'>36. Impact</option>
+<option value='Arial Rounded MT Bold, Arial, sans-serif'>37. Arial Rounded MT Bold</option>
+<option value='Chalkboard, Chalkboard SE, sans-serif'>38. Chalkboard</option>
+<option value='Chalkboard SE, Chalkboard, sans-serif'>39. Chalkboard SE</option>
+<option value='Marker Felt, fantasy'>40. Marker Felt</option>
+<option value='Noteworthy, cursive'>41. Noteworthy</option>
+<option value='Snell Roundhand, cursive'>42. Snell Roundhand</option>
+<option value='Bradley Hand, cursive'>43. Bradley Hand</option>
+<option value='Brush Script MT, cursive'>44. Brush Script MT</option>
+<option value='Comic Sans MS, cursive'>45. Comic Sans MS</option>
+<option value='Papyrus, fantasy'>46. Papyrus</option>
+<option value='DIN Alternate, Arial Narrow, sans-serif'>47. DIN Alternate</option>
+<option value='DIN Condensed, Arial Narrow, sans-serif'>48. DIN Condensed</option>
+<option value='SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif'>49. SF Pro Display</option>
+<option value='SF Pro Text, -apple-system, BlinkMacSystemFont, sans-serif'>50. SF Pro Text</option>
+<option value='San Francisco, -apple-system, BlinkMacSystemFont, sans-serif'>51. San Francisco</option>
+<option value='Roboto, Arial, sans-serif'>52. Roboto</option>
+<option value='Roboto Condensed, Arial Narrow, sans-serif'>53. Roboto Condensed</option>
+<option value='Open Sans, Arial, sans-serif'>54. Open Sans</option>
+<option value='Noto Sans, Arial, sans-serif'>55. Noto Sans</option>
+<option value='Noto Serif, Georgia, serif'>56. Noto Serif</option>
+<option value='Lato, Arial, sans-serif'>57. Lato</option>
+<option value='Montserrat, Arial, sans-serif'>58. Montserrat</option>
+<option value='Poppins, Arial, sans-serif'>59. Poppins</option>
+<option value='Oswald, Arial Narrow, sans-serif'>60. Oswald</option>
+<option value='Source Sans Pro, Arial, sans-serif'>61. Source Sans Pro</option>
+<option value='Source Serif Pro, Georgia, serif'>62. Source Serif Pro</option>
+<option value='Ubuntu, Arial, sans-serif'>63. Ubuntu</option>
+<option value='PT Sans, Arial, sans-serif'>64. PT Sans</option>
+<option value='PT Serif, Georgia, serif'>65. PT Serif</option>
+<option value='Merriweather, Georgia, serif'>66. Merriweather</option>
+<option value='Inter, -apple-system, Arial, sans-serif'>67. Inter</option>
+<option value='IBM Plex Sans, Arial, sans-serif'>68. IBM Plex Sans</option>
+<option value='IBM Plex Serif, Georgia, serif'>69. IBM Plex Serif</option>
+<option value='League Gothic, Impact, sans-serif'>70. League Gothic</option>
+<option value='Bebas Neue, Impact, sans-serif'>71. Bebas Neue</option>
+<option value='Proxima Nova, Helvetica Neue, Arial, sans-serif'>72. Proxima Nova</option>
+<option value='Garamond, Georgia, serif'>73. Garamond</option>
+<option value='EB Garamond, Garamond, serif'>74. EB Garamond</option>
+<option value='Cormorant Garamond, Garamond, serif'>75. Cormorant Garamond</option>
+<option value='Playfair Display, Georgia, serif'>76. Playfair Display</option>
+<option value='Libre Baskerville, Baskerville, serif'>77. Libre Baskerville</option>
+<option value='Libre Franklin, Arial, sans-serif'>78. Libre Franklin</option>
+<option value='Work Sans, Arial, sans-serif'>79. Work Sans</option>
+<option value='Nunito, Arial, sans-serif'>80. Nunito</option>
+<option value='Nunito Sans, Arial, sans-serif'>81. Nunito Sans</option>
+<option value='Raleway, Arial, sans-serif'>82. Raleway</option>
+<option value='Quicksand, Arial, sans-serif'>83. Quicksand</option>
+<option value='Mulish, Arial, sans-serif'>84. Mulish</option>
+<option value='Manrope, Arial, sans-serif'>85. Manrope</option>
+<option value='Karla, Arial, sans-serif'>86. Karla</option>
+<option value='Rubik, Arial, sans-serif'>87. Rubik</option>
+<option value='Barlow, Arial, sans-serif'>88. Barlow</option>
+<option value='Barlow Condensed, Arial Narrow, sans-serif'>89. Barlow Condensed</option>
+<option value='Barlow Semi Condensed, Arial Narrow, sans-serif'>90. Barlow Semi Condensed</option>
+<option value='Cabin, Arial, sans-serif'>91. Cabin</option>
+<option value='Heebo, Arial, sans-serif'>92. Heebo</option>
+<option value='Figtree, Arial, sans-serif'>93. Figtree</option>
+<option value='Outfit, Arial, sans-serif'>94. Outfit</option>
+<option value='Sora, Arial, sans-serif'>95. Sora</option>
+<option value='Urbanist, Arial, sans-serif'>96. Urbanist</option>
+<option value='Exo 2, Arial, sans-serif'>97. Exo 2</option>
+<option value='Titillium Web, Arial, sans-serif'>98. Titillium Web</option>
+<option value='Archivo, Arial, sans-serif'>99. Archivo</option>
+<option value='Archivo Narrow, Arial Narrow, sans-serif'>100. Archivo Narrow</option>
+<option value='Assistant, Arial, sans-serif'>101. Assistant</option>
+<option value='Asap, Arial, sans-serif'>102. Asap</option>
+<option value='Asap Condensed, Arial Narrow, sans-serif'>103. Asap Condensed</option>
+<option value='Questrial, Arial, sans-serif'>104. Questrial</option>
+<option value='Josefin Sans, Arial, sans-serif'>105. Josefin Sans</option>
+<option value='Josefin Slab, Georgia, serif'>106. Josefin Slab</option>
+<option value='Arvo, Georgia, serif'>107. Arvo</option>
+<option value='Bitter, Georgia, serif'>108. Bitter</option>
+<option value='Lora, Georgia, serif'>109. Lora</option>
+<option value='Crimson Text, Georgia, serif'>110. Crimson Text</option>
+<option value='Crimson Pro, Georgia, serif'>111. Crimson Pro</option>
+<option value='Spectral, Georgia, serif'>112. Spectral</option>
+<option value='Vollkorn, Georgia, serif'>113. Vollkorn</option>
+<option value='Cardo, Georgia, serif'>114. Cardo</option>
+<option value='Domine, Georgia, serif'>115. Domine</option>
+<option value='Rokkitt, Georgia, serif'>116. Rokkitt</option>
+<option value='Slabo 27px, Georgia, serif'>117. Slabo 27px</option>
+<option value='Zilla Slab, Georgia, serif'>118. Zilla Slab</option>
+<option value='Roboto Slab, Georgia, serif'>119. Roboto Slab</option>
+<option value='Merriweather Sans, Arial, sans-serif'>120. Merriweather Sans</option>
+<option value='Noto Sans Display, Arial, sans-serif'>121. Noto Sans Display</option>
+<option value='Noto Serif Display, Georgia, serif'>122. Noto Serif Display</option>
+<option value='Atkinson Hyperlegible, Arial, sans-serif'>123. Atkinson Hyperlegible</option>
+<option value='Lexend, Arial, sans-serif'>124. Lexend</option>
+<option value='Public Sans, Arial, sans-serif'>125. Public Sans</option>
+<option value='DM Sans, Arial, sans-serif'>126. DM Sans</option>
+<option value='DM Serif Display, Georgia, serif'>127. DM Serif Display</option>
+<option value='DM Serif Text, Georgia, serif'>128. DM Serif Text</option>
+<option value='Plus Jakarta Sans, Arial, sans-serif'>129. Plus Jakarta Sans</option>
+<option value='Space Grotesk, Arial, sans-serif'>130. Space Grotesk</option>
+<option value='Archivo Black, Arial Black, sans-serif'>131. Archivo Black</option>
+<option value='Anton, Impact, sans-serif'>132. Anton</option>
+<option value='Alfa Slab One, Rockwell, serif'>133. Alfa Slab One</option>
+<option value='Fjalla One, Arial Narrow, sans-serif'>134. Fjalla One</option>
+<option value='Teko, Arial Narrow, sans-serif'>135. Teko</option>
+<option value='Rajdhani, Arial, sans-serif'>136. Rajdhani</option>
+<option value='Orbitron, Arial, sans-serif'>137. Orbitron</option>
+<option value='Audiowide, Arial, sans-serif'>138. Audiowide</option>
+<option value='Russo One, Arial Black, sans-serif'>139. Russo One</option>
+<option value='Michroma, Arial, sans-serif'>140. Michroma</option>
+<option value='Oxanium, Arial, sans-serif'>141. Oxanium</option>
+<option value='Chakra Petch, Arial, sans-serif'>142. Chakra Petch</option>
+<option value='Share Tech, Arial, sans-serif'>143. Share Tech</option>
+<option value='Exo, Arial, sans-serif'>144. Exo</option>
+<option value='Electrolize, Arial, sans-serif'>145. Electrolize</option>
+<option value='Kanit, Arial, sans-serif'>146. Kanit</option>
+<option value='Prompt, Arial, sans-serif'>147. Prompt</option>
+<option value='Saira, Arial, sans-serif'>148. Saira</option>
+<option value='Saira Condensed, Arial Narrow, sans-serif'>149. Saira Condensed</option>
+<option value='Yanone Kaffeesatz, Arial Narrow, sans-serif'>150. Yanone Kaffeesatz</option>
+</select></label><button id="gammaBoldToggle" class="mini-toggle font-bold-toggle" type="button">B</button></div>
+<div class="subgroup"><h4>Karakterbeállítás</h4>
+<label>Karakterszélesség <span id="gammaFontScaleXValue">100%</span><input id="gammaFontScaleX" type="range" min="50" max="160" step="1" value="100"></label>
+<label>Karaktermagasság <span id="gammaFontScaleYValue">100%</span><input id="gammaFontScaleY" type="range" min="50" max="160" step="1" value="100"></label>
+<label>Mérete <span id="gammaSizeValue">100%</span><input id="gammaSize" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Ikon mérete <span id="gammaIconSizeValue">72 px</span><input id="gammaIconSize" type="range" min="32" max="180" step="1" value="72"></label>
+<label>V-pozíció <span id="gammaYValue">0 px</span><input id="gammaY" type="range" min="-500" max="500" step="1" value="0"></label>
+<label>H-pozíció <span id="gammaXValue">0 px</span><input id="gammaX" type="range" min="-700" max="700" step="1" value="0"></label>
+</div>
+<div class="gamma-threshold-note">Vizuális jelzés: ≤180 zöld · 181–249 lassan villogó zöld · 250–399 lassan villogó sárga · 400–499 gyorsan villogó sárga · ≥500 folyamatos piros.</div>
+</section>
+
 <section class="settings-group"><h3>Háttér</h3>
 <label>Háttérszín (Solid)<input id="bgColor" type="color" value="#000000"></label>
 <label>Háttérkép<input id="backgroundImage" type="file" accept="image/*"></label>
@@ -2706,6 +2909,9 @@ body.pseudo-fullscreen #app {
 <option value="minimal">Minimal</option>
 <option value="classic2">Klasszikus 2</option>
         </select></label>
+<label class="sound-volume-control">Hangerő <span id="beepVolumeValue">100%</span>
+  <input id="beepVolume" type="range" min="0" max="100" step="1" value="100">
+</label>
 <label>Hang kiválasztása az eszközről<input id="customSoundInput" type="file" accept="audio/*"></label>
 <div class="manual-sound-button-row">
   <button id="customSoundTest" type="button" class="secondary-button">Kiválasztott hang lejátszása</button>
@@ -2727,10 +2933,6 @@ body.pseudo-fullscreen #app {
 </div>
 
 
-<div style="display:none" aria-hidden="true">
-  <input id="beepVolume" type="range" min="0" max="100" value="100">
-  <span id="beepVolumeValue">100%</span>
-</div>
 
 </aside>
 
@@ -5082,6 +5284,45 @@ calendarWeekFontFamily.addEventListener("change",()=>{settings.calendarWeekFontF
     document.addEventListener(evt, v62UnlockAllAudio, { once: true, passive: true });
   });
 })();
+
+/* v63 GAMMA RADUATION */
+(function(){
+var gammaEl=document.getElementById("gammaRadiation"),gammaIcon=document.getElementById("gammaIcon"),gammaValue=document.getElementById("gammaValue");
+var showGamma=document.getElementById("showGamma"),gammaTextColor=document.getElementById("gammaTextColor"),gammaFontFamily=document.getElementById("gammaFontFamily"),gammaBoldToggle=document.getElementById("gammaBoldToggle");
+var gammaFontScaleX=document.getElementById("gammaFontScaleX"),gammaFontScaleY=document.getElementById("gammaFontScaleY"),gammaSize=document.getElementById("gammaSize"),gammaIconSize=document.getElementById("gammaIconSize"),gammaX=document.getElementById("gammaX"),gammaY=document.getElementById("gammaY");
+var gammaFontScaleXValue=document.getElementById("gammaFontScaleXValue"),gammaFontScaleYValue=document.getElementById("gammaFontScaleYValue"),gammaSizeValue=document.getElementById("gammaSizeValue"),gammaIconSizeValue=document.getElementById("gammaIconSizeValue"),gammaXValue=document.getElementById("gammaXValue"),gammaYValue=document.getElementById("gammaYValue");
+if(!gammaEl||!gammaIcon||!gammaValue)return;
+var gs={show:localStorage.getItem("showGamma")!=="false",color:localStorage.getItem("gammaTextColor")||"#ffffff",font:localStorage.getItem("gammaFontFamily")||'"Jozsika Light", Arial, Helvetica, sans-serif',bold:localStorage.getItem("gammaFontBold")==="true",scaleX:Number(localStorage.getItem("gammaFontScaleX")||100),scaleY:Number(localStorage.getItem("gammaFontScaleY")||100),size:Number(localStorage.getItem("gammaSize")||100),iconSize:Number(localStorage.getItem("gammaIconSize")||72),x:Number(localStorage.getItem("gammaX")||0),y:Number(localStorage.getItem("gammaY")||0)};
+function apply(){gammaEl.classList.toggle("hidden-display",!gs.show);gammaEl.style.color=gs.color;gammaEl.style.fontFamily=gs.font;gammaEl.style.fontWeight=gs.bold?"800":"400";gammaEl.style.setProperty("--gamma-font-x",gs.scaleX/100);gammaEl.style.setProperty("--gamma-font-y",gs.scaleY/100);gammaEl.style.setProperty("--gamma-scale",gs.size/100);gammaEl.style.setProperty("--gamma-icon-size",gs.iconSize+"px");gammaEl.style.setProperty("--gamma-x",gs.x+"px");gammaEl.style.setProperty("--gamma-y",gs.y+"px");
+if(showGamma)showGamma.checked=gs.show;if(gammaTextColor)gammaTextColor.value=gs.color;if(gammaFontFamily)gammaFontFamily.value=gs.font;if(gammaBoldToggle)gammaBoldToggle.classList.toggle("active",gs.bold);
+if(gammaFontScaleX)gammaFontScaleX.value=gs.scaleX;if(gammaFontScaleY)gammaFontScaleY.value=gs.scaleY;if(gammaSize)gammaSize.value=gs.size;if(gammaIconSize)gammaIconSize.value=gs.iconSize;if(gammaX)gammaX.value=gs.x;if(gammaY)gammaY.value=gs.y;
+if(gammaFontScaleXValue)gammaFontScaleXValue.textContent=gs.scaleX+"%";if(gammaFontScaleYValue)gammaFontScaleYValue.textContent=gs.scaleY+"%";if(gammaSizeValue)gammaSizeValue.textContent=gs.size+"%";if(gammaIconSizeValue)gammaIconSizeValue.textContent=gs.iconSize+" px";if(gammaXValue)gammaXValue.textContent=gs.x+" px";if(gammaYValue)gammaYValue.textContent=gs.y+" px";}
+function save(k,v){try{localStorage.setItem(k,String(v))}catch(_){}}
+if(showGamma)showGamma.addEventListener("change",function(){gs.show=showGamma.checked;save("showGamma",gs.show);apply()});
+if(gammaTextColor)gammaTextColor.addEventListener("input",function(){gs.color=gammaTextColor.value;save("gammaTextColor",gs.color);apply()});
+if(gammaFontFamily)gammaFontFamily.addEventListener("change",function(){gs.font=gammaFontFamily.value;save("gammaFontFamily",gs.font);apply()});
+if(gammaBoldToggle)gammaBoldToggle.addEventListener("click",function(){gs.bold=!gs.bold;save("gammaFontBold",gs.bold);apply()});
+[[gammaFontScaleX,"scaleX","gammaFontScaleX"],[gammaFontScaleY,"scaleY","gammaFontScaleY"],[gammaSize,"size","gammaSize"],[gammaIconSize,"iconSize","gammaIconSize"],[gammaX,"x","gammaX"],[gammaY,"y","gammaY"]].forEach(function(a){var el=a[0],prop=a[1],key=a[2];if(!el)return;el.addEventListener("input",function(){gs[prop]=Number(el.value);apply()});el.addEventListener("change",function(){gs[prop]=Number(el.value);save(key,gs[prop]);apply()})});
+function visual(v){gammaIcon.classList.remove("gamma-green","gamma-yellow","gamma-red","gamma-blink-slow","gamma-blink-fast");if(v>=500)gammaIcon.classList.add("gamma-red");else if(v>=400)gammaIcon.classList.add("gamma-yellow","gamma-blink-fast");else if(v>=250)gammaIcon.classList.add("gamma-yellow","gamma-blink-slow");else if(v>180)gammaIcon.classList.add("gamma-green","gamma-blink-slow");else gammaIcon.classList.add("gamma-green")}
+function parse(raw){if(!raw)return null;var station="Budapest II. ker. THHE";try{var d=new DOMParser().parseFromString(raw,"text/html"),rows=d.querySelectorAll("tr");for(var i=0;i<rows.length;i++){var rt=(rows[i].textContent||"").replace(/\s+/g," ").trim();if(rt.indexOf(station)<0)continue;var cells=rows[i].querySelectorAll("td,th"),si=-1;for(var c=0;c<cells.length;c++)if((cells[c].textContent||"").indexOf(station)>=0){si=c;break}if(si>=0)for(var j=si+1;j<cells.length;j++){var t=(cells[j].textContent||"").replace(",",".").trim(),mm=t.match(/(?:^|\s)(\d{1,4}(?:\.\d+)?)(?:\s|$)/);if(mm){var n=Number(mm[1]);if(Number.isFinite(n)&&n>=0&&n<5000)return n}}}}catch(_){}
+var s=raw.replace(/&nbsp;/gi," ").replace(/\u00a0/g," ").replace(/\r/g,"\n"),p=s.indexOf(station);if(p>=0){var tail=s.slice(p+station.length,p+station.length+900),m=tail.match(/(?:\||>|:|\s)\s*(\d{1,4}(?:[.,]\d+)?)\s*(?:nSv\/h)?/i);if(m){var v=Number(m[1].replace(",","."));if(Number.isFinite(v)&&v>=0&&v<5000)return v}}return null}
+function getText(url,timeout){return new Promise(function(resolve,reject){var ctl=null,timer=null,opt={method:"GET",cache:"no-store"};try{if(typeof AbortController!=="undefined"){ctl=new AbortController();opt.signal=ctl.signal;timer=setTimeout(function(){try{ctl.abort()}catch(_){}},timeout||15000)}}catch(_){}fetch(url,opt).then(function(r){if(timer)clearTimeout(timer);if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}).then(resolve).catch(reject)})}
+var SRC="https://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor";
+async function update(){var urls=[SRC,"https://api.allorigins.win/raw?url="+encodeURIComponent(SRC),"https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor"],err=null;for(var i=0;i<urls.length;i++){try{var txt=await getText(urls[i],15000),v=parse(txt);if(!Number.isFinite(v))throw new Error("THHE value not found");gammaValue.textContent=String(Math.round(v));visual(v);try{localStorage.setItem("lastGammaRadiation",JSON.stringify({value:v,time:Date.now()}))}catch(_){}return}catch(e){err=e}}
+try{var cached=JSON.parse(localStorage.getItem("lastGammaRadiation")||"null");if(cached&&Number.isFinite(Number(cached.value))){gammaValue.textContent=String(Math.round(Number(cached.value)));visual(Number(cached.value));return}}catch(_){}gammaValue.textContent="--";visual(0);console.warn("Gamma radiation update failed:",err)}
+apply();update();setInterval(update,60*60*1000);window.addEventListener("online",function(){setTimeout(update,2500)});
+})();
+
+/* v63 touch-first slider engine */
+(function(){
+function dp(step){var s=String(step||"1"),p=s.indexOf(".");return p<0?0:s.length-p-1}
+function setx(r,x){var b=r.getBoundingClientRect();if(!b||!b.width)return;var mn=Number(r.min||0),mx=Number(r.max||100),st=Number(r.step||1);if(!Number.isFinite(st)||st<=0)st=1;var q=Math.max(0,Math.min(1,(x-b.left)/b.width)),raw=mn+q*(mx-mn),v=mn+Math.round((raw-mn)/st)*st;v=Math.max(mn,Math.min(mx,v));var d=dp(st),n=d?v.toFixed(d):String(Math.round(v));if(r.value!==n){r.value=n;r.dispatchEvent(new Event("input",{bubbles:true}))}}
+function attach(r){if(!r||r.dataset.v63TouchRange==="1")return;r.dataset.v63TouchRange="1";var active=false;r.addEventListener("touchstart",function(e){if(!e.touches||e.touches.length!==1)return;active=true;setx(r,e.touches[0].clientX);e.preventDefault()},{passive:false});r.addEventListener("touchmove",function(e){if(!active||!e.touches||e.touches.length!==1)return;setx(r,e.touches[0].clientX);e.preventDefault()},{passive:false});r.addEventListener("touchend",function(e){if(!active)return;active=false;r.dispatchEvent(new Event("change",{bubbles:true}));e.preventDefault()},{passive:false});r.addEventListener("touchcancel",function(){active=false},{passive:true})}
+var rs=document.querySelectorAll('#settingsPanel input[type="range"]');for(var i=0;i<rs.length;i++)attach(rs[i]);
+})();
+
+/* v63 unified sound volume */
+(function(){if(!beepVolume)return;function a(){var v=Math.max(0,Math.min(100,Number(beepVolume.value||0)));settings.beepVolume=v;if(beepVolumeValue)beepVolumeValue.textContent=v+"%";var l=v/100;try{if(hourlyAudioPlayer)hourlyAudioPlayer.volume=l}catch(_){}try{if(customSoundAudio)customSoundAudio.volume=l}catch(_){}try{if(v43ManualAudio)v43ManualAudio.volume=l}catch(_){}}beepVolume.addEventListener("input",a);beepVolume.addEventListener("change",function(){a();localStorage.setItem("beepVolume",String(settings.beepVolume))});a()})();
 </script>
 <script>
 window.addEventListener("DOMContentLoaded", function () {
@@ -5395,7 +5636,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=62", { updateViaCache: "none" })
+      .register("./service-worker.js?v=63", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
