@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=57">
+  <link rel="manifest" href="./manifest.json?v=58">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1625,20 +1625,17 @@ body.pseudo-fullscreen #app {
 }
 
 
-/* v57 – smaller gap between temperature row and weather text */
-#weatherText {
-  margin-top: .08em !important;
-  line-height: 1.05 !important;
-}
-
-.weather-main {
-  margin-bottom: 0 !important;
-  line-height: 1 !important;
+/* v58 – visibly tighter temperature -> weather text spacing */
+#weatherText.weather-text {
+  margin-top: -0.32em !important;
+  line-height: 1.02 !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 </style>
 </head>
-<body data-wallclock-version="57">
+<body data-wallclock-version="58">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1685,7 +1682,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v57</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v58</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -5024,7 +5021,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=57", { updateViaCache: "none" })
+      .register("./service-worker.js?v=58", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
