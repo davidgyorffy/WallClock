@@ -2737,7 +2737,7 @@ const DIGITAL_BEEPS = {
   digital20: { type:"square", f1:2050, f2:2600, dur:0.050, gap:0.022, gain:0.33, attack:0.001, release:0.015 },
 };
 
-const WEATHER_CACHE_VERSION = 14;
+const WEATHER_CACHE_VERSION = 15;
 
 try {
   const raw = localStorage.getItem("lastWeather");
@@ -3765,6 +3765,86 @@ function weatherDescription(code, cloudCover = null, isDay = 1, dni = null, suns
   return { text: "Változó", icon: "partly" };
 }
 
+
+function v54XHRJson(url, timeoutMs) {
+  return new Promise(function(resolve, reject) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.timeout = timeoutMs || 12000;
+      xhr.responseType = "text";
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch (e) {
+            reject(new Error("XHR JSON parse error"));
+          }
+        } else {
+          reject(new Error("XHR HTTP " + xhr.status));
+        }
+      };
+
+      xhr.onerror = function() {
+        reject(new Error("XHR network error"));
+      };
+
+      xhr.ontimeout = function() {
+        reject(new Error("XHR timeout"));
+      };
+
+      xhr.send(null);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+async function v54GetJson(url) {
+  var fetchError = null;
+
+  if (typeof fetch === "function") {
+    try {
+      var controller = null;
+      var timer = null;
+      var options = {
+        method: "GET",
+        cache: "no-store"
+      };
+
+      if (typeof AbortController !== "undefined") {
+        controller = new AbortController();
+        options.signal = controller.signal;
+        timer = setTimeout(function() {
+          try { controller.abort(); } catch (_) {}
+        }, 12000);
+      }
+
+      var response = await fetch(url, options);
+      if (timer) clearTimeout(timer);
+
+      if (!response.ok) {
+        throw new Error("fetch HTTP " + response.status);
+      }
+
+      return await response.json();
+    } catch (e) {
+      fetchError = e;
+      console.warn("Weather fetch failed, trying XHR:", e);
+    }
+  }
+
+  try {
+    return await v54XHRJson(url, 12000);
+  } catch (xhrError) {
+    var fmsg = fetchError && fetchError.message ? fetchError.message : "fetch unavailable";
+    var xmsg = xhrError && xhrError.message ? xhrError.message : "XHR failed";
+    throw new Error(fmsg + " | " + xmsg);
+  }
+}
+
 async function updateWeather() {
   /*
     v53:
@@ -3791,17 +3871,7 @@ async function updateWeather() {
 
   try {
     /* Essential request – intentionally simple for old Safari/iPadOS. */
-    const response = await fetch(currentUrl, {
-      method: "GET",
-      cache: "no-store",
-      mode: "cors"
-    });
-
-    if (!response.ok) {
-      throw new Error("Current weather HTTP " + response.status);
-    }
-
-    const data = await response.json();
+    const data = await v54GetJson(currentUrl);
     currentData = data && data.current ? data.current : null;
 
     if (!currentData) {
@@ -3835,7 +3905,7 @@ async function updateWeather() {
 
     /* Cache a valid current result immediately. */
     localStorage.setItem("lastWeather", JSON.stringify({
-      cache_version: 14,
+      cache_version: 15,
       temp: currentTemp,
       description: currentResult.text,
       iconType: currentResult.icon,
@@ -3844,6 +3914,10 @@ async function updateWeather() {
 
   } catch (currentError) {
     console.error("Current weather update failed:", currentError);
+    try {
+      localStorage.setItem("lastWeatherError",
+        (currentError && currentError.message) ? currentError.message : String(currentError));
+    } catch (_) {}
 
     /* Try cached temperature. Do NOT clear it merely because detail data failed. */
     let usedCache = false;
@@ -3854,7 +3928,7 @@ async function updateWeather() {
         const w = JSON.parse(cached);
         const age = Date.now() - Number(w.savedAt || 0);
 
-        if ((w.cache_version === 14 || w.cache_version === 13) &&
+        if ((w.cache_version === 15 || w.cache_version === 14 || w.cache_version === 13) &&
             age >= 0 &&
             age <= 3 * 60 * 60 * 1000 &&
             Number.isFinite(Number(w.temp))) {
@@ -3868,8 +3942,13 @@ async function updateWeather() {
 
     if (!usedCache) {
       temperatureEl.textContent = "--°C";
+      var weatherErrorText = "";
+      try { weatherErrorText = localStorage.getItem("lastWeatherError") || ""; } catch (_) {}
+
       weatherTextEl.textContent =
-        navigator.onLine ? "Időjárási adat nem elérhető" : "Nincs internetkapcsolat";
+        navigator.onLine
+          ? ("Időjárási adat nem elérhető" + (weatherErrorText ? " · " + weatherErrorText : ""))
+          : "Nincs internetkapcsolat";
       weatherIconEl.innerHTML = "";
     }
 
@@ -3882,17 +3961,7 @@ async function updateWeather() {
     If it fails, current temperature/icon/text above remain untouched.
   */
   try {
-    const detailResponse = await fetch(detailUrl, {
-      method: "GET",
-      cache: "no-store",
-      mode: "cors"
-    });
-
-    if (!detailResponse.ok) {
-      throw new Error("Weather detail HTTP " + detailResponse.status);
-    }
-
-    const detailData = await detailResponse.json();
+    const detailData = await v54GetJson(detailUrl);
     const hourly = getNearestHourlyWeather(detailData);
 
     if (!hourly) return;
@@ -3911,7 +3980,7 @@ async function updateWeather() {
     weatherIconEl.innerHTML = iconSVG(detailedResult.icon);
 
     localStorage.setItem("lastWeather", JSON.stringify({
-      cache_version: 14,
+      cache_version: 15,
       temp: currentTemp,
       description: detailedResult.text,
       iconType: detailedResult.icon,
@@ -4449,6 +4518,13 @@ if (calendarWeekSize) {
 
   renderCWSize();
 })();
+
+
+window.addEventListener("online", function() {
+  setTimeout(function() {
+    updateWeather();
+  }, 1200);
+});
 
 document.addEventListener("pointerdown", unlockAudio, { once: true });
 document.addEventListener("touchstart", unlockAudio, { once: true });
