@@ -1395,6 +1395,75 @@ body.pseudo-fullscreen #app {
   font-size: var(--calendar-week-size, 48px) !important;
 }
 
+
+/* ================================================================
+   v50 – TRUE PER-DIGIT CLOCK ANIMATION
+   Only a character whose numeric value changes is animated.
+   ================================================================ */
+#hours, #minutes {
+  display: inline-flex !important;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.clock-digit {
+  display: inline-block;
+  position: relative;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  font-variant-numeric: tabular-nums;
+  will-change: auto;
+}
+
+/* FLIP: clearly 3D, vertical card-like rotation */
+.clock-digit.v50-flip {
+  will-change: transform, opacity;
+  animation: v50DigitFlip .52s cubic-bezier(.20,.72,.18,1);
+}
+@keyframes v50DigitFlip {
+  0%   { transform: perspective(620px) rotateX(-92deg); opacity:.10; }
+  48%  { transform: perspective(620px) rotateX(11deg); opacity:1; }
+  70%  { transform: perspective(620px) rotateX(-4deg); }
+  86%  { transform: perspective(620px) rotateX(1.5deg); }
+  100% { transform: perspective(620px) rotateX(0deg); opacity:1; }
+}
+
+/* FADE: opacity only, deliberately no directional motion */
+.clock-digit.v50-fade {
+  will-change: opacity;
+  animation: v50DigitFade .44s ease-out;
+}
+@keyframes v50DigitFade {
+  0%   { opacity:.04; }
+  100% { opacity:1; }
+}
+
+/* SLIDE: obvious vertical entry, no 3D rotation */
+.clock-digit.v50-slide {
+  will-change: transform, opacity;
+  animation: v50DigitSlide .42s cubic-bezier(.18,.78,.22,1);
+}
+@keyframes v50DigitSlide {
+  0%   { transform: translate3d(0,-.58em,0); opacity:.05; }
+  65%  { transform: translate3d(0,.06em,0); opacity:1; }
+  100% { transform: translate3d(0,0,0); opacity:1; }
+}
+
+/* Calendar Week: size the actual visible cw text directly. */
+#calendarWeekText {
+  font-size: var(--calendar-week-size, 48px) !important;
+  line-height: 1 !important;
+}
+
+
+/* v50: old v48 whole-block animation is disabled */
+#hours.v48-flip, #minutes.v48-flip,
+#hours.v48-fade, #minutes.v48-fade,
+#hours.v48-slide, #minutes.v48-slide {
+  animation: none !important;
+}
+
 </style>
 </head>
 <body>
@@ -1408,9 +1477,9 @@ body.pseudo-fullscreen #app {
     </header>
 
     <section id="clock" class="clock text-backdrop" aria-label="Pontos idő">
-      <span id="hours">14</span>
+      <span id="hours"><span class="clock-digit">1</span><span class="clock-digit">4</span></span>
       <span id="colonSpacer" class="colon-spacer" aria-hidden="true"></span>
-      <span id="minutes">37</span>
+      <span id="minutes"><span class="clock-digit">3</span><span class="clock-digit">7</span></span>
     </section>
 
     <div id="clockSeparator" class="clock-separator" aria-hidden="true">
@@ -2309,7 +2378,7 @@ body.pseudo-fullscreen #app {
   <div class="subgroup"><h4>Karakterbeállítás</h4>
     <label>Karakterszélesség <span id="calendarWeekFontScaleXValue">100%</span><input id="calendarWeekFontScaleX" type="range" min="50" max="160" step="1" value="100"></label>
     <label>Karaktermagasság <span id="calendarWeekFontScaleYValue">100%</span><input id="calendarWeekFontScaleY" type="range" min="50" max="160" step="1" value="100"></label>
-    <label>Mérete <span id="calendarWeekSizeValue">48 px</span><input id="calendarWeekSize" type="range" min="20" max="500" step="1" value="48"></label>
+    <label>Mérete <span id="calendarWeekSizeValue">48 px</span><input id="calendarWeekSize" type="range" min="20" max="400" step="1" value="48"></label>
     <label>H-pozíció <span id="calendarWeekXValue">0 px</span><input id="calendarWeekX" type="range" min="-500" max="500" step="1" value="0"></label>
     <label>V-pozíció <span id="calendarWeekYValue">0 px</span><input id="calendarWeekY" type="range" min="-40" max="40" step="1" value="0"></label>
   </div>
@@ -2663,7 +2732,7 @@ const settings = {
   calendarWeekFontBold: localStorage.getItem("calendarWeekFontBold") === "true",
   calendarWeekFontScaleX: Number(localStorage.getItem("calendarWeekFontScaleX") || 100),
   calendarWeekFontScaleY: Number(localStorage.getItem("calendarWeekFontScaleY") || 100),
-  calendarWeekSize: Number(localStorage.getItem("calendarWeekSizePx") || 48),
+  calendarWeekSize: Math.min(400, Math.max(20, Number(localStorage.getItem("calendarWeekSizePx") || 48))),
   calendarWeekX: Number(localStorage.getItem("calendarWeekX") || 0),
   calendarWeekY: Number(localStorage.getItem("calendarWeekY") || 0),
   backgroundColor: localStorage.getItem("backgroundColor") || "#000000",
@@ -2745,25 +2814,50 @@ function updateCalendarWeek(now = new Date()) {
 }
 
 
-function v48SetClockPart(el, newText) {
-  if (!el || el.textContent === newText) return;
-  el.textContent = newText;
+function v50EnsureDigitNodes(group, text) {
+  if (!group) return [];
+  let digits = Array.from(group.querySelectorAll(".clock-digit"));
 
-  const mode = (settings && settings.clockAnimation) ? settings.clockAnimation : "none";
+  if (digits.length !== text.length) {
+    group.textContent = "";
+    digits = [];
+    for (let i = 0; i < text.length; i++) {
+      const digit = document.createElement("span");
+      digit.className = "clock-digit";
+      digit.textContent = text[i];
+      group.appendChild(digit);
+      digits.push(digit);
+    }
+  }
+  return digits;
+}
+
+function v50AnimateDigit(digit, newChar, mode) {
+  if (!digit || digit.textContent === newChar) return;
+
+  digit.classList.remove("v50-flip", "v50-fade", "v50-slide");
+  digit.textContent = newChar;
+
   if (mode === "none") return;
 
-  const cls = "v48-" + mode;
-  el.classList.remove("v48-flip", "v48-fade", "v48-slide");
+  /* Only the digit that actually changes gets an animation class. */
+  void digit.offsetWidth;
+  digit.classList.add("v50-" + mode);
 
-  /* A forced style flush happens only on a real hour/minute change,
-     never during the normal 250 ms clock refresh. */
-  void el.offsetWidth;
-  el.classList.add(cls);
+  clearTimeout(digit._v50AnimationTimer);
+  digit._v50AnimationTimer = setTimeout(function () {
+    digit.classList.remove("v50-flip", "v50-fade", "v50-slide");
+  }, 600);
+}
 
-  clearTimeout(el._v48AnimationTimer);
-  el._v48AnimationTimer = setTimeout(function () {
-    el.classList.remove(cls);
-  }, 560);
+function v50SetClockPart(group, newText) {
+  if (!group) return;
+  const digits = v50EnsureDigitNodes(group, newText);
+  const mode = (settings && settings.clockAnimation) ? settings.clockAnimation : "none";
+
+  for (let i = 0; i < newText.length; i++) {
+    v50AnimateDigit(digits[i], newText[i], mode);
+  }
 }
 
 function updateClock() {
@@ -2775,8 +2869,8 @@ function updateClock() {
   const newMinutesText = pad2(now.getMinutes());
   if (dateEl.textContent !== newDateText) dateEl.textContent = newDateText;
   if (weekdayEl.textContent !== newWeekdayText) weekdayEl.textContent = newWeekdayText;
-  v48SetClockPart(hoursEl, newHoursText);
-  v48SetClockPart(minutesEl, newMinutesText);
+  v50SetClockPart(hoursEl, newHoursText);
+  v50SetClockPart(minutesEl, newMinutesText);
   const sec = now.getSeconds();
   const ms = now.getMilliseconds();
   if (settings.secondsFormat === "TENTH") {
@@ -3595,6 +3689,7 @@ function applySettingsToUI() {
   app.style.setProperty("--calendar-week-font-y", settings.calendarWeekFontScaleY / 100);
   app.style.setProperty("--calendar-week-size", `${settings.calendarWeekSize}px`);
   calendarWeek.style.fontSize = `${settings.calendarWeekSize}px`;
+  calendarWeekText.style.fontSize = `${settings.calendarWeekSize}px`;
   app.style.setProperty("--calendar-week-x", `${settings.calendarWeekX}px`);
   app.style.setProperty("--calendar-week-y", `${settings.calendarWeekY}vh`);
   showCalendarWeek.checked = settings.showCalendarWeek;
@@ -3913,6 +4008,7 @@ function v48ApplyRangeNow(el) {
     case "calendarWeekSize":
       app.style.setProperty("--calendar-week-size", v + "px");
       calendarWeek.style.fontSize = v + "px";
+      calendarWeekText.style.fontSize = v + "px";
       calendarWeekSizeValue.textContent = v + " px"; break;
     case "clockSize":
       app.style.setProperty("--clock-scale", v/100);
@@ -4007,6 +4103,7 @@ if (calendarWeekSize) {
     settings.calendarWeekSize = value;
     if (calendarWeekSizeValue) calendarWeekSizeValue.textContent = value + " px";
     if (calendarWeek) calendarWeek.style.fontSize = value + "px";
+    if (calendarWeekText) calendarWeekText.style.fontSize = value + "px";
     if (app) app.style.setProperty("--calendar-week-size", value + "px");
   }, { passive: true });
 
@@ -4015,8 +4112,43 @@ if (calendarWeekSize) {
     settings.calendarWeekSize = value;
     localStorage.setItem("calendarWeekSizePx", String(value));
     if (calendarWeek) calendarWeek.style.fontSize = value + "px";
+    if (calendarWeekText) calendarWeekText.style.fontSize = value + "px";
   });
 }
+
+
+/* v50 – definitive Calendar Week size binding */
+(function () {
+  if (!calendarWeekSize || !calendarWeekText) return;
+
+  let cwRAF = 0;
+  function renderCWSize() {
+    cwRAF = 0;
+    let px = Number(calendarWeekSize.value);
+    if (!Number.isFinite(px)) px = 48;
+    px = Math.max(20, Math.min(400, px));
+
+    settings.calendarWeekSize = px;
+    calendarWeekSizeValue.textContent = px + " px";
+    calendarWeekText.style.setProperty("font-size", px + "px", "important");
+    calendarWeek.style.setProperty("font-size", px + "px", "important");
+    app.style.setProperty("--calendar-week-size", px + "px");
+  }
+
+  calendarWeekSize.max = "400";
+
+  calendarWeekSize.addEventListener("input", function () {
+    if (cwRAF) cancelAnimationFrame(cwRAF);
+    cwRAF = requestAnimationFrame(renderCWSize);
+  }, true);
+
+  calendarWeekSize.addEventListener("change", function () {
+    renderCWSize();
+    localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+  }, true);
+
+  renderCWSize();
+})();
 
 document.addEventListener("pointerdown", unlockAudio, { once: true });
 document.addEventListener("touchstart", unlockAudio, { once: true });
