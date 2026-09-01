@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=61">
+  <link rel="manifest" href="./manifest.json?v=62">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1650,7 +1650,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="61">
+<body data-wallclock-version="62">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1697,7 +1697,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v61</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v62</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2745,7 +2745,8 @@ body.pseudo-fullscreen #app {
 </div>
 
 
-  <script>try { localStorage.removeItem(["hourly","Beep"].join("")); } catch (_) {}
+  <audio id="hourlyAudioPlayer" preload="auto" playsinline webkit-playsinline style="display:none"></audio>
+<script>try { localStorage.removeItem(["hourly","Beep"].join("")); } catch (_) {}
 
 const DIGITAL_BEEPS = {
 
@@ -2902,6 +2903,9 @@ let lastChimedHourKey = null;
 const customSoundInput = document.getElementById("customSoundInput");
 let customSoundObjectUrl = null;
 let customSoundAudio = null;
+const hourlyAudioPlayer = document.getElementById("hourlyAudioPlayer");
+let v62AudioArmed = false;
+let v62ArmPromise = null;
 if (localStorage.getItem("beepSound") === "digital") localStorage.setItem("beepSound", "digital01");
 
 const calendarWeek = document.getElementById("calendarWeek");
@@ -3548,6 +3552,155 @@ function playOneBeep(startTime) {
 }
 
 
+
+/* v62 – iPad/Safari compatible persistent audio player */
+const V62_SILENT_WAV =
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+
+function v62ArmPersistentAudio() {
+  if (v62AudioArmed) return Promise.resolve(true);
+  if (v62ArmPromise) return v62ArmPromise;
+
+  v62ArmPromise = new Promise(function(resolve) {
+    try {
+      /* Unlock WebAudio too, while we still have a real user gesture. */
+      try {
+        if (!audioContext) {
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) audioContext = new Ctx();
+        }
+        if (audioContext && audioContext.state === "suspended" && audioContext.resume) {
+          try {
+            var rp = audioContext.resume();
+            if (rp && typeof rp.catch === "function") rp.catch(function(){});
+          } catch (_) {}
+        }
+        if (audioContext) audioUnlocked = true;
+      } catch (_) {}
+
+      if (!hourlyAudioPlayer) {
+        v62AudioArmed = true;
+        resolve(true);
+        return;
+      }
+
+      var oldVolume = hourlyAudioPlayer.volume;
+      hourlyAudioPlayer.volume = 0;
+      hourlyAudioPlayer.src = V62_SILENT_WAV;
+      hourlyAudioPlayer.load();
+
+      var p = hourlyAudioPlayer.play();
+      if (p && typeof p.then === "function") {
+        p.then(function() {
+          try {
+            hourlyAudioPlayer.pause();
+            hourlyAudioPlayer.currentTime = 0;
+            hourlyAudioPlayer.removeAttribute("src");
+            hourlyAudioPlayer.load();
+            hourlyAudioPlayer.volume = oldVolume;
+          } catch (_) {}
+          v62AudioArmed = true;
+          v62ArmPromise = null;
+          resolve(true);
+        }).catch(function(err) {
+          console.warn("Persistent audio arm blocked:", err);
+          try { hourlyAudioPlayer.volume = oldVolume; } catch (_) {}
+          v62ArmPromise = null;
+          resolve(false);
+        });
+      } else {
+        try {
+          hourlyAudioPlayer.pause();
+          hourlyAudioPlayer.currentTime = 0;
+          hourlyAudioPlayer.removeAttribute("src");
+          hourlyAudioPlayer.load();
+          hourlyAudioPlayer.volume = oldVolume;
+        } catch (_) {}
+        v62AudioArmed = true;
+        v62ArmPromise = null;
+        resolve(true);
+      }
+    } catch (e) {
+      console.warn("Persistent audio arm error:", e);
+      v62ArmPromise = null;
+      resolve(false);
+    }
+  });
+
+  return v62ArmPromise;
+}
+
+function v62SourceForListSound(selected) {
+  if (!selected || selected === "none") return "";
+
+  var sourceEl = null;
+  if (selected === "casioClassic") {
+    sourceEl = document.getElementById("casioClassicAudio");
+  } else if (typeof EMBEDDED_CHIME_KEYS !== "undefined" && EMBEDDED_CHIME_KEYS.has(selected)) {
+    sourceEl = document.getElementById("embedded_" + selected);
+  }
+
+  if (!sourceEl) return "";
+  return sourceEl.currentSrc || sourceEl.src || sourceEl.getAttribute("src") || "";
+}
+
+function v62PlayPersistentSource(src) {
+  if (!hourlyAudioPlayer || !src) return false;
+
+  try {
+    hourlyAudioPlayer.pause();
+    hourlyAudioPlayer.currentTime = 0;
+
+    if (hourlyAudioPlayer.src !== src) {
+      hourlyAudioPlayer.src = src;
+      hourlyAudioPlayer.load();
+    }
+
+    hourlyAudioPlayer.volume = Math.max(0, Math.min(1, settings.beepVolume / 100));
+
+    var p = hourlyAudioPlayer.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(function(err) {
+        console.warn("Persistent audio playback blocked:", err);
+      });
+    }
+    return true;
+  } catch (e) {
+    console.warn("Persistent audio playback error:", e);
+    return false;
+  }
+}
+
+function v62PlayListSoundOnce(selected) {
+  if (!selected || selected === "none") return false;
+
+  var mediaSrc = v62SourceForListSound(selected);
+  if (mediaSrc) {
+    return v62PlayPersistentSource(mediaSrc);
+  }
+
+  /* Synthesized list sounds use the already-unlocked WebAudio context. */
+  return v61PlaySynthListSoundOnce(selected);
+}
+
+function v62PlayConfiguredHourlySound() {
+  var selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+
+  if (selected !== "none") {
+    return v62PlayListSoundOnce(selected);
+  }
+
+  if (customSoundObjectUrl) {
+    return v62PlayPersistentSource(customSoundObjectUrl);
+  }
+
+  if (v43ManualAudioUrl) {
+    return v62PlayPersistentSource(v43ManualAudioUrl);
+  }
+
+  return false;
+}
+
 /* v61 – one direct sound route for list preview and hourly playback */
 function v61EnsureAudioContext() {
   try {
@@ -3719,8 +3872,8 @@ function v61PlayConfiguredHourlySound() {
 }
 
 function playDoubleBeep() {
-  /* v61: hourly sound uses exactly the same direct route as preview. */
-  v61PlayConfiguredHourlySound();
+  /* v62: hourly playback uses the same persistent player as manual playback. */
+  v62PlayConfiguredHourlySound();
 }
 
 function maybeHourlyChime(now) {
@@ -4775,34 +4928,41 @@ customSoundInput.addEventListener("change", () => {
   v43ManualAudioUrl = customSoundObjectUrl;
   v43ManualAudio = customSoundAudio;
 
+  /* The same persistent element will be used for the future hourly chime. */
+  try {
+    if (hourlyAudioPlayer) {
+      hourlyAudioPlayer.pause();
+      hourlyAudioPlayer.src = customSoundObjectUrl;
+      hourlyAudioPlayer.load();
+    }
+  } catch (_) {}
+
   customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
 customSoundTest.addEventListener("click", async () => {
-  if (!customSoundAudio) {
-    const file = customSoundInput.files && customSoundInput.files[0];
-    if (!file) {
-      alert("Előbb válassz ki egy hangfájlt az eszközről.");
-      return;
-    }
-    if (customSoundObjectUrl) URL.revokeObjectURL(customSoundObjectUrl);
-    customSoundObjectUrl = URL.createObjectURL(file);
-    customSoundAudio = new Audio(customSoundObjectUrl);
+  const file = customSoundInput.files && customSoundInput.files[0];
+  if (!customSoundObjectUrl && !file) {
+    alert("Előbb válassz ki egy hangfájlt az eszközről.");
+    return;
   }
 
-  if (!customSoundAudio.paused && !customSoundAudio.ended) {
-    customSoundAudio.pause();
-    customSoundAudio.currentTime = 0;
+  await v62ArmPersistentAudio();
+
+  if (!customSoundObjectUrl && file) {
+    customSoundObjectUrl = URL.createObjectURL(file);
+    v43ManualAudioUrl = customSoundObjectUrl;
+  }
+
+  if (hourlyAudioPlayer && !hourlyAudioPlayer.paused && !hourlyAudioPlayer.ended) {
+    hourlyAudioPlayer.pause();
+    hourlyAudioPlayer.currentTime = 0;
     customSoundTest.textContent = "Kiválasztott hang lejátszása";
     return;
   }
 
-  customSoundAudio.currentTime = 0;
-  try {
-    await customSoundAudio.play();
+  if (v62PlayPersistentSource(customSoundObjectUrl || v43ManualAudioUrl)) {
     customSoundTest.textContent = "Lejátszás leállítása";
-  } catch (e) {
-    console.warn("Egyéni hang lejátszási hiba:", e);
   }
 });
 
@@ -4832,26 +4992,40 @@ customSoundDelete.addEventListener("click", () => {
   customSoundObjectUrl = null;
   v43ManualAudio = null;
   v43ManualAudioUrl = null;
+  try {
+    if (hourlyAudioPlayer) {
+      hourlyAudioPlayer.pause();
+      hourlyAudioPlayer.removeAttribute("src");
+      hourlyAudioPlayer.load();
+    }
+  } catch (_) {}
   try { customSoundInput.value = ""; } catch (_) {}
   customSoundTest.textContent = "Kiválasztott hang lejátszása";
 });
 
-function v61PreviewSelectedListSound() {
+function v62PreviewSelectedListSound() {
   var selected = beepSound ? beepSound.value : "none";
   if (selected === "none") return;
-  v61PlayListSoundOnce(selected);
+  v62PlayListSoundOnce(selected);
 }
 
+/*
+  Important for old iPad Safari:
+  touching the select itself is a user gesture. Arm audio BEFORE the native
+  select picker opens; the later "change" event may no longer count as one.
+*/
+["touchstart", "pointerdown", "mousedown"].forEach(function(evt) {
+  beepSound.addEventListener(evt, function() {
+    v62ArmPersistentAudio();
+  }, {passive:true});
+});
+
 beepSound.addEventListener("change", function () {
-  /* Save directly: do not depend on the large general saveSettings() routine. */
   settings.beepSound = beepSound.value;
   localStorage.setItem("beepSound", settings.beepSound);
 
-  /* A list selection is also the user gesture that unlocks WebAudio on iPad. */
-  v61EnsureAudioContext();
-
   if (settings.beepSound !== "none") {
-    v61PreviewSelectedListSound();
+    v62PreviewSelectedListSound();
   }
 });
 
@@ -4899,12 +5073,13 @@ calendarWeekFontFamily.addEventListener("change",()=>{settings.calendarWeekFontF
 
 
 (function () {
-  function v61UnlockAllAudio() {
+  function v62UnlockAllAudio() {
     try { v43UnlockAudio(); } catch (_) {}
     try { v61EnsureAudioContext(); } catch (_) {}
+    try { v62ArmPersistentAudio(); } catch (_) {}
   }
   ["pointerdown", "touchstart", "click"].forEach(function (evt) {
-    document.addEventListener(evt, v61UnlockAllAudio, { once: true, passive: true });
+    document.addEventListener(evt, v62UnlockAllAudio, { once: true, passive: true });
   });
 })();
 </script>
@@ -5220,7 +5395,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=61", { updateViaCache: "none" })
+      .register("./service-worker.js?v=62", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
