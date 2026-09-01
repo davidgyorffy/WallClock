@@ -1,0 +1,44 @@
+name: Update gamma radiation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-gamma:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scraper dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Fetch Budapest II. ker. THHE radiation value
+        run: python scripts/update_gamma.py
+
+      - name: Commit gamma.json if changed
+        run: |
+          git config user.name "wallclock-gamma-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add gamma.json
+          if git diff --cached --quiet; then
+            echo "No gamma data change."
+          else
+            git commit -m "Update gamma radiation data"
+            git push
+          fi
