@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=66">
+  <link rel="manifest" href="./manifest.json?v=67">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1681,7 +1681,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="66">
+<body data-wallclock-version="67">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1734,7 +1734,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v66</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v67</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2613,7 +2613,7 @@ body.pseudo-fullscreen #app {
 
 
 <section class="settings-group gamma-settings-group"><h3>GAMMA RADUATION</h3>
-<div class="setting-help">Budapest II. ker. THHE · HU0350 · aktuális gamma-háttérsugárzás · nSv/h · frissítés óránként</div>
+<div class="setting-help">Budapest II. ker. THHE · HU0350 · nSv/h · GitHub Actions frissítés óránként</div>
 <label class="check-row"><input id="showGamma" type="checkbox" checked><span>Gamma sugárzás kijelzése</span></label>
 <label>Szöveg színe <input id="gammaTextColor" type="color" value="#ffffff"></label>
 <div class="font-select-row"><label>Betűtípus<select id="gammaFontFamily">
@@ -5480,91 +5480,70 @@ return null
 
 var SRC="https://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor";
 var MAPSRC="https://www.katasztrofavedelem.hu/modules/hattersugarzas/terkep";
-var EURDEP_HU0350="https://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350";
 
 async function update(){
 var err=null;
 
-/* 1. PRIMARY: EURDEP/JRC station HU0350.
-   This is the same Budapest II. ker. THHE station, returned as JSON in nSv/h. */
-var jsonUrls=[
-  EURDEP_HU0350,
-  "https://api.allorigins.win/raw?url="+encodeURIComponent(EURDEP_HU0350),
-  "https://corsproxy.io/?"+encodeURIComponent(EURDEP_HU0350)
-];
+/* v67 PRIMARY SOURCE:
+   gamma.json is generated hourly by GitHub Actions in this same repository.
+   This avoids iPad CORS and dynamic-page restrictions completely. */
+try{
+  var gammaResponse=await fetch("./gamma.json?t="+Date.now(),{
+    method:"GET",
+    cache:"no-store",
+    headers:{"Accept":"application/json"}
+  });
 
-for(var j=0;j<jsonUrls.length;j++){
+  if(!gammaResponse.ok)throw new Error("gamma.json HTTP "+gammaResponse.status);
+
+  var gammaData=await gammaResponse.json();
+  var localValue=Number(gammaData&&gammaData.value);
+
+  if(!Number.isFinite(localValue))throw new Error("gamma.json has no measurement yet");
+
+  gammaValue.textContent=String(Math.round(localValue));
+  visual(localValue);
+
   try{
-    var data=await getJson(jsonUrls[j],15000);
-    var eurValue=parseEurdepPoint(data);
-    if(!Number.isFinite(eurValue))throw new Error("HU0350 EURDEP value not found");
-    gammaValue.textContent=String(Math.round(eurValue));
-    visual(eurValue);
-    try{
-      localStorage.setItem("lastGammaRadiation",JSON.stringify({
-        value:eurValue,
-        time:Date.now(),
-        source:"EURDEP HU0350"
-      }))
-    }catch(_){}
-    return
-  }catch(e){err=e}
+    localStorage.setItem("lastGammaRadiation",JSON.stringify({
+      value:localValue,
+      time:Date.now(),
+      source:"GitHub gamma.json",
+      sourceUpdated:gammaData.updated_utc||null,
+      stale:!!gammaData.stale
+    }))
+  }catch(_){}
+
+  return
+}catch(e){
+  err=e;
+  console.warn("gamma.json unavailable:",e)
 }
 
-/* Some CORS proxies return JSON as plain text. */
-var textJsonUrls=[
-  "https://r.jina.ai/http://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350",
-  "https://r.jina.ai/https://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350"
-];
-for(var tj=0;tj<textJsonUrls.length;tj++){
-  try{
-    var jt=await getText(textJsonUrls[tj],15000);
-    var parsedJson=null;
-    try{
-      var first=jt.indexOf("{"),last=jt.lastIndexOf("}");
-      if(first>=0&&last>first)parsedJson=JSON.parse(jt.slice(first,last+1))
-    }catch(_){}
-    var jv=parseEurdepPoint(parsedJson);
-    if(!Number.isFinite(jv))throw new Error("HU0350 proxied JSON not found");
-    gammaValue.textContent=String(Math.round(jv));
-    visual(jv);
-    try{
-      localStorage.setItem("lastGammaRadiation",JSON.stringify({
-        value:jv,time:Date.now(),source:"EURDEP HU0350 proxy"
-      }))
-    }catch(_){}
-    return
-  }catch(e){err=e}
-}
-
-/* 2. FALLBACK: Hungarian BM OKF pages. */
+/* Browser fallback: preserve the old direct methods only as a backup. */
 var urls=[
   SRC,
   MAPSRC,
   "https://api.allorigins.win/raw?url="+encodeURIComponent(SRC),
-  "https://api.allorigins.win/raw?url="+encodeURIComponent(MAPSRC),
-  "https://corsproxy.io/?"+encodeURIComponent(SRC),
-  "https://corsproxy.io/?"+encodeURIComponent(MAPSRC),
-  "https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor",
-  "https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/terkep"
+  "https://api.allorigins.win/raw?url="+encodeURIComponent(MAPSRC)
 ];
 
 for(var i=0;i<urls.length;i++){
   try{
-    var txt=await getText(urls[i],15000),v=parse(txt);
+    var txt=await getText(urls[i],12000),v=parse(txt);
     if(!Number.isFinite(v))throw new Error("THHE value not found");
     gammaValue.textContent=String(Math.round(v));
     visual(v);
     try{
       localStorage.setItem("lastGammaRadiation",JSON.stringify({
-        value:v,time:Date.now(),source:"BM OKF"
+        value:v,time:Date.now(),source:"BM OKF browser fallback"
       }))
     }catch(_){}
     return
   }catch(e){err=e}
 }
 
-/* 3. Offline fallback to last successful measurement. */
+/* Offline fallback to the last successfully displayed reading. */
 try{
   var cached=JSON.parse(localStorage.getItem("lastGammaRadiation")||"null");
   if(cached&&Number.isFinite(Number(cached.value))){
@@ -5929,7 +5908,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=66", { updateViaCache: "none" })
+      .register("./service-worker.js?v=67", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
