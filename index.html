@@ -2737,13 +2737,13 @@ const DIGITAL_BEEPS = {
   digital20: { type:"square", f1:2050, f2:2600, dur:0.050, gap:0.022, gain:0.33, attack:0.001, release:0.015 },
 };
 
-const WEATHER_CACHE_VERSION = 13;
+const WEATHER_CACHE_VERSION = 14;
 
 try {
   const raw = localStorage.getItem("lastWeather");
   if (raw) {
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.cache_version !== WEATHER_CACHE_VERSION) {
+    if (parsed && parsed.cache_version !== WEATHER_CACHE_VERSION && parsed.cache_version !== 13) {
       localStorage.removeItem("lastWeather");
     }
   }
@@ -3766,65 +3766,100 @@ function weatherDescription(code, cloudCover = null, isDay = 1, dni = null, suns
 }
 
 async function updateWeather() {
-  const url = `https://api.open-meteo.com/v1/dwd-icon?latitude=${LOCATION.latitude}&longitude=${LOCATION.longitude}&current=temperature_2m,weather_code,cloud_cover,is_day&hourly=weather_code,cloud_cover,direct_normal_irradiance,sunshine_duration,shortwave_radiation&past_hours=2&forecast_hours=3&timezone=Europe%2FBudapest`;
+  /*
+    v53:
+    1) Fetch the essential current weather first from the generic forecast API.
+       Temperature is rendered immediately.
+    2) Detailed hourly solar data is optional. A failure there must never erase
+       a valid current temperature.
+  */
+  const currentUrl =
+    `https://api.open-meteo.com/v1/forecast?latitude=${LOCATION.latitude}` +
+    `&longitude=${LOCATION.longitude}` +
+    `&current=temperature_2m,weather_code,cloud_cover,is_day` +
+    `&timezone=Europe%2FBudapest`;
+
+  const detailUrl =
+    `https://api.open-meteo.com/v1/dwd-icon?latitude=${LOCATION.latitude}` +
+    `&longitude=${LOCATION.longitude}` +
+    `&hourly=weather_code,cloud_cover,direct_normal_irradiance,sunshine_duration,shortwave_radiation` +
+    `&past_hours=2&forecast_hours=3&timezone=Europe%2FBudapest`;
+
+  let currentData = null;
+  let currentTemp = null;
+  let currentResult = null;
 
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    /* Essential request – intentionally simple for old Safari/iPadOS. */
+    const response = await fetch(currentUrl, {
+      method: "GET",
+      cache: "no-store",
+      mode: "cors"
+    });
 
     if (!response.ok) {
-      let detail = "";
-      try { detail = await response.text(); } catch (_) {}
-      throw new Error(`Weather API HTTP ${response.status}${detail ? ": " + detail.slice(0,180) : ""}`);
+      throw new Error("Current weather HTTP " + response.status);
     }
 
     const data = await response.json();
+    currentData = data && data.current ? data.current : null;
 
-    if (!data.current || !Number.isFinite(Number(data.current.temperature_2m))) {
-      throw new Error("Weather API response missing current temperature");
+    if (!currentData) {
+      throw new Error("Current weather data missing");
     }
 
-    const hourly = getNearestHourlyWeather(data);
-    const temp = Math.round(Number(data.current.temperature_2m));
+    const parsedTemp = Number(currentData.temperature_2m);
+    if (!Number.isFinite(parsedTemp)) {
+      throw new Error("Current temperature invalid");
+    }
 
-    const result = weatherDescription(
-      hourly?.weather_code ?? data.current.weather_code,
-      hourly?.cloud_cover ?? data.current.cloud_cover,
-      data.current.is_day,
-      hourly?.direct_normal_irradiance,
-      hourly?.sunshine_duration,
-      hourly?.shortwave_radiation
+    currentTemp = Math.round(parsedTemp);
+
+    /*
+      Most important change:
+      show temperature BEFORE any optional hourly/detail processing.
+    */
+    temperatureEl.textContent = currentTemp + "°C";
+
+    currentResult = weatherDescription(
+      currentData.weather_code,
+      currentData.cloud_cover,
+      currentData.is_day,
+      null,
+      null,
+      null
     );
 
-    temperatureEl.textContent = `${temp}°C`;
-    weatherTextEl.textContent = result.text;
-    weatherIconEl.innerHTML = iconSVG(result.icon);
+    weatherTextEl.textContent = currentResult.text;
+    weatherIconEl.innerHTML = iconSVG(currentResult.icon);
 
+    /* Cache a valid current result immediately. */
     localStorage.setItem("lastWeather", JSON.stringify({
-      cache_version: 13,
-      temp,
-      description: result.text,
-      iconType: result.icon,
-      cloud_cover: hourly?.cloud_cover ?? data.current.cloud_cover ?? null,
-      direct_normal_irradiance: hourly?.direct_normal_irradiance ?? null,
-      sunshine_duration: hourly?.sunshine_duration ?? null,
-      shortwave_radiation: hourly?.shortwave_radiation ?? null,
+      cache_version: 14,
+      temp: currentTemp,
+      description: currentResult.text,
+      iconType: currentResult.icon,
       savedAt: Date.now()
     }));
-  } catch (error) {
-    console.error("Weather update failed:", error);
 
-    const cached = localStorage.getItem("lastWeather");
+  } catch (currentError) {
+    console.error("Current weather update failed:", currentError);
+
+    /* Try cached temperature. Do NOT clear it merely because detail data failed. */
     let usedCache = false;
+    const cached = localStorage.getItem("lastWeather");
 
     if (cached) {
       try {
         const w = JSON.parse(cached);
         const age = Date.now() - Number(w.savedAt || 0);
 
-        // Only reuse a recent cache (max 60 min) and only from this fixed version.
-        if (w.cache_version === 13 && age >= 0 && age <= 60 * 60 * 1000) {
-          temperatureEl.textContent = `${w.temp}°C`;
-          weatherTextEl.textContent = `${w.description} · korábbi adat`;
+        if ((w.cache_version === 14 || w.cache_version === 13) &&
+            age >= 0 &&
+            age <= 3 * 60 * 60 * 1000 &&
+            Number.isFinite(Number(w.temp))) {
+          temperatureEl.textContent = Math.round(Number(w.temp)) + "°C";
+          weatherTextEl.textContent = (w.description || "Időjárás") + " · korábbi adat";
           weatherIconEl.innerHTML = iconSVG(w.iconType || "partly");
           usedCache = true;
         }
@@ -3833,10 +3868,68 @@ async function updateWeather() {
 
     if (!usedCache) {
       temperatureEl.textContent = "--°C";
-      weatherTextEl.textContent = navigator.onLine ? "Időjárási adat nem elérhető" : "Nincs internetkapcsolat";
+      weatherTextEl.textContent =
+        navigator.onLine ? "Időjárási adat nem elérhető" : "Nincs internetkapcsolat";
       weatherIconEl.innerHTML = "";
     }
+
+    /* No point requesting optional detail if essential weather failed. */
+    return;
   }
+
+  /*
+    Optional DWD detail request.
+    If it fails, current temperature/icon/text above remain untouched.
+  */
+  try {
+    const detailResponse = await fetch(detailUrl, {
+      method: "GET",
+      cache: "no-store",
+      mode: "cors"
+    });
+
+    if (!detailResponse.ok) {
+      throw new Error("Weather detail HTTP " + detailResponse.status);
+    }
+
+    const detailData = await detailResponse.json();
+    const hourly = getNearestHourlyWeather(detailData);
+
+    if (!hourly) return;
+
+    const detailedResult = weatherDescription(
+      hourly.weather_code != null ? hourly.weather_code : currentData.weather_code,
+      hourly.cloud_cover != null ? hourly.cloud_cover : currentData.cloud_cover,
+      currentData.is_day,
+      hourly.direct_normal_irradiance,
+      hourly.sunshine_duration,
+      hourly.shortwave_radiation
+    );
+
+    /* Temperature is deliberately NOT touched here. */
+    weatherTextEl.textContent = detailedResult.text;
+    weatherIconEl.innerHTML = iconSVG(detailedResult.icon);
+
+    localStorage.setItem("lastWeather", JSON.stringify({
+      cache_version: 14,
+      temp: currentTemp,
+      description: detailedResult.text,
+      iconType: detailedResult.icon,
+      savedAt: Date.now()
+    }));
+
+  } catch (detailError) {
+    console.warn("Optional weather detail failed; current weather kept:", detailError);
+  }
+}
+
+
+function v53WeatherRetrySoon() {
+  setTimeout(function () {
+    if (temperatureEl && temperatureEl.textContent === "--°C" && navigator.onLine) {
+      updateWeather();
+    }
+  }, 15000);
 }
 
 function normalizeFontSelection(selectEl,value){
@@ -4363,6 +4456,7 @@ document.addEventListener("touchstart", unlockAudio, { once: true });
 applySettingsToUI();
 updateClock();
 updateWeather();
+v53WeatherRetrySoon();
 
 let clockTimer = null;
 function scheduleClockUpdate() {
