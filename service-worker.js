@@ -1,5 +1,5 @@
-const CACHE_NAME = "wallclock-v63";
-const APP_FILES = ["./index.html?v=63", "./manifest.json?v=63"];
+const CACHE_NAME = "wallclock-v65";
+const APP_FILES = ["./index.html?v=65", "./manifest.json?v=65"];
 
 self.addEventListener("install", function(event) {
   self.skipWaiting();
@@ -49,13 +49,13 @@ self.addEventListener("fetch", function(event) {
           if (response && response.ok) {
             var copy = response.clone();
             caches.open(CACHE_NAME).then(function(cache) {
-              cache.put("./index.html?v=63", copy).catch(function(){});
+              cache.put("./index.html?v=65", copy).catch(function(){});
             });
           }
           return response;
         })
         .catch(function() {
-          return caches.match("./index.html?v=63");
+          return caches.match("./index.html?v=65");
         })
     );
     return;
