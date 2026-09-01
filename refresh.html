@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WallClock v55 frissítés</title>
+<style>
+body{background:#000;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:40px 20px}
+h1{font-size:28px}p{font-size:18px;line-height:1.5}button{font-size:20px;padding:14px 20px;margin-top:20px}
+</style>
+</head>
+<body>
+<h1>WallClock v55 frissítés</h1>
+<p id="status">Régi gyorsítótár és Service Worker eltávolítása…</p>
+<button id="go" style="display:none">Falióra megnyitása</button>
+<script>
+(function(){
+  var status=document.getElementById("status");
+  var go=document.getElementById("go");
+
+  function clearCaches(){
+    if (!("caches" in window)) return Promise.resolve();
+    return caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){return caches.delete(k);}));
+    });
+  }
+
+  function clearWorkers(){
+    if (!("serviceWorker" in navigator)) return Promise.resolve();
+    return navigator.serviceWorker.getRegistrations().then(function(regs){
+      return Promise.all(regs.map(function(r){return r.unregister();}));
+    });
+  }
+
+  Promise.all([clearCaches(),clearWorkers()])
+    .then(function(){
+      status.textContent="Kész. A régi PWA gyorsítótár törölve. Most nyisd meg a v55-öt.";
+      go.style.display="inline-block";
+    })
+    .catch(function(e){
+      status.textContent="A tisztítás részben sikertelen: "+(e&&e.message?e.message:e);
+      go.style.display="inline-block";
+    });
+
+  go.onclick=function(){
+    location.replace("./?v=55&t="+Date.now());
+  };
+})();
+</script>
+</body>
+</html>

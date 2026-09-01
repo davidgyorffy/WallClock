@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="./manifest.json?v=55">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1619,7 +1619,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body>
+<body data-wallclock-version="55">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1666,7 +1666,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP</div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v55</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2737,7 +2737,7 @@ const DIGITAL_BEEPS = {
   digital20: { type:"square", f1:2050, f2:2600, dur:0.050, gap:0.022, gain:0.33, attack:0.001, release:0.015 },
 };
 
-const WEATHER_CACHE_VERSION = 15;
+const WEATHER_CACHE_VERSION = 16;
 
 try {
   const raw = localStorage.getItem("lastWeather");
@@ -3905,7 +3905,7 @@ async function updateWeather() {
 
     /* Cache a valid current result immediately. */
     localStorage.setItem("lastWeather", JSON.stringify({
-      cache_version: 15,
+      cache_version: 16,
       temp: currentTemp,
       description: currentResult.text,
       iconType: currentResult.icon,
@@ -3914,9 +3914,10 @@ async function updateWeather() {
 
   } catch (currentError) {
     console.error("Current weather update failed:", currentError);
+    var directWeatherError =
+      (currentError && currentError.message) ? currentError.message : String(currentError || "unknown error");
     try {
-      localStorage.setItem("lastWeatherError",
-        (currentError && currentError.message) ? currentError.message : String(currentError));
+      localStorage.setItem("lastWeatherError", directWeatherError);
     } catch (_) {}
 
     /* Try cached temperature. Do NOT clear it merely because detail data failed. */
@@ -3928,7 +3929,7 @@ async function updateWeather() {
         const w = JSON.parse(cached);
         const age = Date.now() - Number(w.savedAt || 0);
 
-        if ((w.cache_version === 15 || w.cache_version === 14 || w.cache_version === 13) &&
+        if ((w.cache_version === 16 || w.cache_version === 15 || w.cache_version === 14 || w.cache_version === 13) &&
             age >= 0 &&
             age <= 3 * 60 * 60 * 1000 &&
             Number.isFinite(Number(w.temp))) {
@@ -3942,13 +3943,11 @@ async function updateWeather() {
 
     if (!usedCache) {
       temperatureEl.textContent = "--°C";
-      var weatherErrorText = "";
-      try { weatherErrorText = localStorage.getItem("lastWeatherError") || ""; } catch (_) {}
-
+      var weatherErrorText = directWeatherError || "";
       weatherTextEl.textContent =
         navigator.onLine
-          ? ("Időjárási adat nem elérhető" + (weatherErrorText ? " · " + weatherErrorText : ""))
-          : "Nincs internetkapcsolat";
+          ? ("Időjárási adat nem elérhető · " + weatherErrorText)
+          : ("Nincs internetkapcsolat · " + weatherErrorText);
       weatherIconEl.innerHTML = "";
     }
 
@@ -3980,7 +3979,7 @@ async function updateWeather() {
     weatherIconEl.innerHTML = iconSVG(detailedResult.icon);
 
     localStorage.setItem("lastWeather", JSON.stringify({
-      cache_version: 15,
+      cache_version: 16,
       temp: currentTemp,
       description: detailedResult.text,
       iconType: detailedResult.icon,
@@ -5005,7 +5004,14 @@ window.addEventListener("DOMContentLoaded", function () {
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
-    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+    navigator.serviceWorker
+      .register("./service-worker.js?v=55", { updateViaCache: "none" })
+      .then(function(reg) {
+        try { reg.update(); } catch (_) {}
+      })
+      .catch(function(err) {
+        console.warn("Service worker registration failed:", err);
+      });
   });
 }
 </script>
