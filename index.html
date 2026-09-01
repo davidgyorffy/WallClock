@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=65">
+  <link rel="manifest" href="./manifest.json?v=66">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1658,7 +1658,7 @@ body.pseudo-fullscreen #app {
 .settings-panel input[type="range"]::-moz-range-thumb{width:32px!important;height:32px!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.95)!important;background:#f4f4f4!important}
 .sound-volume-control{margin-top:18px!important;margin-bottom:14px!important}.sound-volume-control>span{float:right;opacity:.82}
 
-.gamma-radiation{--gamma-x:0px;--gamma-y:0px;--gamma-scale:1;--gamma-font-x:1;--gamma-font-y:1;--gamma-icon-size:96px;position:absolute;left:50%;top:78%;z-index:4;display:flex;align-items:center;gap:13px;color:#fff;font-family:"Jozsika Light",Arial,Helvetica,sans-serif;font-size:clamp(22px,3vw,42px);white-space:nowrap;transform:translate(-50%,-50%) translate(var(--gamma-x),var(--gamma-y)) scale(var(--gamma-scale));transform-origin:center;pointer-events:none}
+.gamma-radiation{--gamma-x:0px;--gamma-y:0px;--gamma-text-size:42px;--gamma-font-x:1;--gamma-font-y:1;--gamma-icon-size:96px;position:absolute;left:50%;top:78%;z-index:4;display:flex;align-items:center;gap:13px;color:#fff;font-family:"Jozsika Light",Arial,Helvetica,sans-serif;font-size:var(--gamma-text-size);white-space:nowrap;transform:translate(-50%,-50%) translate(var(--gamma-x),var(--gamma-y));transform-origin:center;pointer-events:none}
 .gamma-reading{display:inline-flex;align-items:baseline;gap:.22em;transform:scale(var(--gamma-font-x),var(--gamma-font-y));transform-origin:left center;font-variant-numeric:tabular-nums}.gamma-unit{font-size:.56em;opacity:.82;letter-spacing:.03em}
 .gamma-icon{width:var(--gamma-icon-size);height:var(--gamma-icon-size);flex:0 0 var(--gamma-icon-size);border-radius:50%;perspective:550px;transform-style:preserve-3d;filter:drop-shadow(0 0 8px rgba(255,255,255,.18))}
 .gamma-icon-3d{width:100%;height:100%;border-radius:50%;background-repeat:no-repeat;background-size:contain;background-position:center;transform-style:preserve-3d;animation:gamma3dSpinFloat 22s linear infinite}
@@ -1681,7 +1681,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="65">
+<body data-wallclock-version="66">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -1734,7 +1734,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v65</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v66</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -2613,7 +2613,7 @@ body.pseudo-fullscreen #app {
 
 
 <section class="settings-group gamma-settings-group"><h3>GAMMA RADUATION</h3>
-<div class="setting-help">Budapest II. ker. THHE · aktuális gamma-háttérsugárzás · nSv/h · frissítés óránként</div>
+<div class="setting-help">Budapest II. ker. THHE · HU0350 · aktuális gamma-háttérsugárzás · nSv/h · frissítés óránként</div>
 <label class="check-row"><input id="showGamma" type="checkbox" checked><span>Gamma sugárzás kijelzése</span></label>
 <label>Szöveg színe <input id="gammaTextColor" type="color" value="#ffffff"></label>
 <div class="font-select-row"><label>Betűtípus<select id="gammaFontFamily">
@@ -2777,7 +2777,7 @@ body.pseudo-fullscreen #app {
 <div class="subgroup"><h4>Karakterbeállítás</h4>
 <label>Karakterszélesség <span id="gammaFontScaleXValue">100%</span><input id="gammaFontScaleX" type="range" min="50" max="160" step="1" value="100"></label>
 <label>Karaktermagasság <span id="gammaFontScaleYValue">100%</span><input id="gammaFontScaleY" type="range" min="50" max="160" step="1" value="100"></label>
-<label>Mérete <span id="gammaSizeValue">100%</span><input id="gammaSize" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Érték / szöveg mérete <span id="gammaSizeValue">42 px</span><input id="gammaSize" type="range" min="18" max="220" step="1" value="42"></label>
 <label>Ikon mérete <span id="gammaIconSizeValue">96 px</span><input id="gammaIconSize" type="range" min="32" max="420" step="1" value="96"></label>
 <label>V-pozíció <span id="gammaYValue">0 px</span><input id="gammaY" type="range" min="-500" max="500" step="1" value="0"></label>
 <label>H-pozíció <span id="gammaXValue">0 px</span><input id="gammaX" type="range" min="-700" max="700" step="1" value="0"></label>
@@ -5375,11 +5375,11 @@ var showGamma=document.getElementById("showGamma"),gammaTextColor=document.getEl
 var gammaFontScaleX=document.getElementById("gammaFontScaleX"),gammaFontScaleY=document.getElementById("gammaFontScaleY"),gammaSize=document.getElementById("gammaSize"),gammaIconSize=document.getElementById("gammaIconSize"),gammaX=document.getElementById("gammaX"),gammaY=document.getElementById("gammaY");
 var gammaFontScaleXValue=document.getElementById("gammaFontScaleXValue"),gammaFontScaleYValue=document.getElementById("gammaFontScaleYValue"),gammaSizeValue=document.getElementById("gammaSizeValue"),gammaIconSizeValue=document.getElementById("gammaIconSizeValue"),gammaXValue=document.getElementById("gammaXValue"),gammaYValue=document.getElementById("gammaYValue");
 if(!gammaEl||!gammaIcon||!gammaValue)return;
-var gs={show:localStorage.getItem("showGamma")!=="false",color:localStorage.getItem("gammaTextColor")||"#ffffff",font:localStorage.getItem("gammaFontFamily")||'"Jozsika Light", Arial, Helvetica, sans-serif',bold:localStorage.getItem("gammaFontBold")==="true",scaleX:Number(localStorage.getItem("gammaFontScaleX")||100),scaleY:Number(localStorage.getItem("gammaFontScaleY")||100),size:Number(localStorage.getItem("gammaSize")||100),iconSize:Number(localStorage.getItem("gammaIconSize")||96),x:Number(localStorage.getItem("gammaX")||0),y:Number(localStorage.getItem("gammaY")||0)};
-function apply(){gammaEl.classList.toggle("hidden-display",!gs.show);gammaEl.style.color=gs.color;gammaEl.style.fontFamily=gs.font;gammaEl.style.fontWeight=gs.bold?"800":"400";gammaEl.style.setProperty("--gamma-font-x",gs.scaleX/100);gammaEl.style.setProperty("--gamma-font-y",gs.scaleY/100);gammaEl.style.setProperty("--gamma-scale",gs.size/100);gammaEl.style.setProperty("--gamma-icon-size",gs.iconSize+"px");gammaEl.style.setProperty("--gamma-x",gs.x+"px");gammaEl.style.setProperty("--gamma-y",gs.y+"px");
+var gs={show:localStorage.getItem("showGamma")!=="false",color:localStorage.getItem("gammaTextColor")||"#ffffff",font:localStorage.getItem("gammaFontFamily")||'"Jozsika Light", Arial, Helvetica, sans-serif',bold:localStorage.getItem("gammaFontBold")==="true",scaleX:Number(localStorage.getItem("gammaFontScaleX")||100),scaleY:Number(localStorage.getItem("gammaFontScaleY")||100),size:Number(localStorage.getItem("gammaSize")||42),iconSize:Number(localStorage.getItem("gammaIconSize")||96),x:Number(localStorage.getItem("gammaX")||0),y:Number(localStorage.getItem("gammaY")||0)};
+function apply(){gammaEl.classList.toggle("hidden-display",!gs.show);gammaEl.style.color=gs.color;gammaEl.style.fontFamily=gs.font;gammaEl.style.fontWeight=gs.bold?"800":"400";gammaEl.style.setProperty("--gamma-font-x",gs.scaleX/100);gammaEl.style.setProperty("--gamma-font-y",gs.scaleY/100);gammaEl.style.setProperty("--gamma-text-size",gs.size+"px");gammaEl.style.setProperty("--gamma-icon-size",gs.iconSize+"px");gammaEl.style.setProperty("--gamma-x",gs.x+"px");gammaEl.style.setProperty("--gamma-y",gs.y+"px");
 if(showGamma)showGamma.checked=gs.show;if(gammaTextColor)gammaTextColor.value=gs.color;if(gammaFontFamily)gammaFontFamily.value=gs.font;if(gammaBoldToggle)gammaBoldToggle.classList.toggle("active",gs.bold);
 if(gammaFontScaleX)gammaFontScaleX.value=gs.scaleX;if(gammaFontScaleY)gammaFontScaleY.value=gs.scaleY;if(gammaSize)gammaSize.value=gs.size;if(gammaIconSize)gammaIconSize.value=gs.iconSize;if(gammaX)gammaX.value=gs.x;if(gammaY)gammaY.value=gs.y;
-if(gammaFontScaleXValue)gammaFontScaleXValue.textContent=gs.scaleX+"%";if(gammaFontScaleYValue)gammaFontScaleYValue.textContent=gs.scaleY+"%";if(gammaSizeValue)gammaSizeValue.textContent=gs.size+"%";if(gammaIconSizeValue)gammaIconSizeValue.textContent=gs.iconSize+" px";if(gammaXValue)gammaXValue.textContent=gs.x+" px";if(gammaYValue)gammaYValue.textContent=gs.y+" px";}
+if(gammaFontScaleXValue)gammaFontScaleXValue.textContent=gs.scaleX+"%";if(gammaFontScaleYValue)gammaFontScaleYValue.textContent=gs.scaleY+"%";if(gammaSizeValue)gammaSizeValue.textContent=gs.size+" px";if(gammaIconSizeValue)gammaIconSizeValue.textContent=gs.iconSize+" px";if(gammaXValue)gammaXValue.textContent=gs.x+" px";if(gammaYValue)gammaYValue.textContent=gs.y+" px";}
 function save(k,v){try{localStorage.setItem(k,String(v))}catch(_){}}
 if(showGamma)showGamma.addEventListener("change",function(){gs.show=showGamma.checked;save("showGamma",gs.show);apply()});
 if(gammaTextColor)gammaTextColor.addEventListener("input",function(){gs.color=gammaTextColor.value;save("gammaTextColor",gs.color);apply()});
@@ -5443,19 +5443,141 @@ for(var p=0;p<positions.length;p++){
 return null
 }
 function getText(url,timeout){return new Promise(function(resolve,reject){var ctl=null,timer=null,opt={method:"GET",cache:"no-store"};try{if(typeof AbortController!=="undefined"){ctl=new AbortController();opt.signal=ctl.signal;timer=setTimeout(function(){try{ctl.abort()}catch(_){}},timeout||15000)}}catch(_){}fetch(url,opt).then(function(r){if(timer)clearTimeout(timer);if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}).then(resolve).catch(reject)})}
+function getJson(url,timeout){
+return new Promise(function(resolve,reject){
+var ctl=null,timer=null,opt={method:"GET",cache:"no-store",headers:{"Accept":"application/json"}};
+try{
+  if(typeof AbortController!=="undefined"){
+    ctl=new AbortController();opt.signal=ctl.signal;
+    timer=setTimeout(function(){try{ctl.abort()}catch(_){}},timeout||15000)
+  }
+}catch(_){}
+fetch(url,opt).then(function(r){
+  if(timer)clearTimeout(timer);
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json()
+}).then(resolve).catch(reject)
+})
+}
+
+function parseEurdepPoint(data){
+if(!data||typeof data!=="object")return null;
+/* JRC point response: avg.val is the 24 h average gamma dose rate in nSv/h. */
+var candidates=[
+  data.avg&&data.avg.val,
+  data.latest&&data.latest.val,
+  data.current&&data.current.val,
+  data.value,
+  data.val
+];
+for(var i=0;i<candidates.length;i++){
+  var n=Number(candidates[i]);
+  if(Number.isFinite(n)&&n>=0&&n<5000)return n;
+}
+return null
+}
+
+
 var SRC="https://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor";
 var MAPSRC="https://www.katasztrofavedelem.hu/modules/hattersugarzas/terkep";
-async function update(){var urls=[
-SRC,
-MAPSRC,
-"https://api.allorigins.win/raw?url="+encodeURIComponent(SRC),
-"https://api.allorigins.win/raw?url="+encodeURIComponent(MAPSRC),
-"https://corsproxy.io/?"+encodeURIComponent(SRC),
-"https://corsproxy.io/?"+encodeURIComponent(MAPSRC),
-"https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor",
-"https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/terkep"
-],err=null;for(var i=0;i<urls.length;i++){try{var txt=await getText(urls[i],15000),v=parse(txt);if(!Number.isFinite(v))throw new Error("THHE value not found");gammaValue.textContent=String(Math.round(v));visual(v);try{localStorage.setItem("lastGammaRadiation",JSON.stringify({value:v,time:Date.now()}))}catch(_){}return}catch(e){err=e}}
-try{var cached=JSON.parse(localStorage.getItem("lastGammaRadiation")||"null");if(cached&&Number.isFinite(Number(cached.value))){gammaValue.textContent=String(Math.round(Number(cached.value)));visual(Number(cached.value));return}}catch(_){}gammaValue.textContent="--";visual(0);console.warn("Gamma radiation update failed:",err)}
+var EURDEP_HU0350="https://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350";
+
+async function update(){
+var err=null;
+
+/* 1. PRIMARY: EURDEP/JRC station HU0350.
+   This is the same Budapest II. ker. THHE station, returned as JSON in nSv/h. */
+var jsonUrls=[
+  EURDEP_HU0350,
+  "https://api.allorigins.win/raw?url="+encodeURIComponent(EURDEP_HU0350),
+  "https://corsproxy.io/?"+encodeURIComponent(EURDEP_HU0350)
+];
+
+for(var j=0;j<jsonUrls.length;j++){
+  try{
+    var data=await getJson(jsonUrls[j],15000);
+    var eurValue=parseEurdepPoint(data);
+    if(!Number.isFinite(eurValue))throw new Error("HU0350 EURDEP value not found");
+    gammaValue.textContent=String(Math.round(eurValue));
+    visual(eurValue);
+    try{
+      localStorage.setItem("lastGammaRadiation",JSON.stringify({
+        value:eurValue,
+        time:Date.now(),
+        source:"EURDEP HU0350"
+      }))
+    }catch(_){}
+    return
+  }catch(e){err=e}
+}
+
+/* Some CORS proxies return JSON as plain text. */
+var textJsonUrls=[
+  "https://r.jina.ai/http://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350",
+  "https://r.jina.ai/https://rewidget.jrc.ec.europa.eu/v3/objects/point?id=HU0350"
+];
+for(var tj=0;tj<textJsonUrls.length;tj++){
+  try{
+    var jt=await getText(textJsonUrls[tj],15000);
+    var parsedJson=null;
+    try{
+      var first=jt.indexOf("{"),last=jt.lastIndexOf("}");
+      if(first>=0&&last>first)parsedJson=JSON.parse(jt.slice(first,last+1))
+    }catch(_){}
+    var jv=parseEurdepPoint(parsedJson);
+    if(!Number.isFinite(jv))throw new Error("HU0350 proxied JSON not found");
+    gammaValue.textContent=String(Math.round(jv));
+    visual(jv);
+    try{
+      localStorage.setItem("lastGammaRadiation",JSON.stringify({
+        value:jv,time:Date.now(),source:"EURDEP HU0350 proxy"
+      }))
+    }catch(_){}
+    return
+  }catch(e){err=e}
+}
+
+/* 2. FALLBACK: Hungarian BM OKF pages. */
+var urls=[
+  SRC,
+  MAPSRC,
+  "https://api.allorigins.win/raw?url="+encodeURIComponent(SRC),
+  "https://api.allorigins.win/raw?url="+encodeURIComponent(MAPSRC),
+  "https://corsproxy.io/?"+encodeURIComponent(SRC),
+  "https://corsproxy.io/?"+encodeURIComponent(MAPSRC),
+  "https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor",
+  "https://r.jina.ai/http://www.katasztrofavedelem.hu/modules/hattersugarzas/terkep"
+];
+
+for(var i=0;i<urls.length;i++){
+  try{
+    var txt=await getText(urls[i],15000),v=parse(txt);
+    if(!Number.isFinite(v))throw new Error("THHE value not found");
+    gammaValue.textContent=String(Math.round(v));
+    visual(v);
+    try{
+      localStorage.setItem("lastGammaRadiation",JSON.stringify({
+        value:v,time:Date.now(),source:"BM OKF"
+      }))
+    }catch(_){}
+    return
+  }catch(e){err=e}
+}
+
+/* 3. Offline fallback to last successful measurement. */
+try{
+  var cached=JSON.parse(localStorage.getItem("lastGammaRadiation")||"null");
+  if(cached&&Number.isFinite(Number(cached.value))){
+    gammaValue.textContent=String(Math.round(Number(cached.value)));
+    visual(Number(cached.value));
+    return
+  }
+}catch(_){}
+
+gammaValue.textContent="--";
+visual(0);
+console.warn("Gamma radiation update failed:",err)
+}
 apply();update();setInterval(update,60*60*1000);window.addEventListener("online",function(){setTimeout(update,2500)});
 })();
 
@@ -5807,7 +5929,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=65", { updateViaCache: "none" })
+      .register("./service-worker.js?v=66", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
