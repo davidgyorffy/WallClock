@@ -1464,6 +1464,143 @@ body.pseudo-fullscreen #app {
   animation: none !important;
 }
 
+
+/* ================================================================
+   v51 – stable per-character HH:MM animation
+   Fixed-width slots prevent an unchanged neighbouring digit from
+   visually shifting when another glyph has a different width.
+   ================================================================ */
+
+#hours, #minutes {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  white-space: nowrap !important;
+  gap: 0 !important;
+}
+
+.clock-digit-slot {
+  position: relative !important;
+  display: inline-block !important;
+
+  /*
+    A stable advance width is essential with proportional/system fonts.
+    0.72em is intentionally fixed so a 1->8 change cannot recenter
+    the whole two-digit HH/MM group.
+  */
+  width: .72em !important;
+  min-width: .72em !important;
+  max-width: .72em !important;
+  height: 1em !important;
+  line-height: 1em !important;
+
+  text-align: center !important;
+  vertical-align: baseline !important;
+  overflow: visible !important;
+
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  transform-origin: 50% 50% !important;
+  perspective: 700px;
+  -webkit-perspective: 700px;
+}
+
+.clock-digit-current,
+.clock-digit-old,
+.clock-digit-new {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1em !important;
+  text-align: center !important;
+
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-origin: 50% 50% !important;
+}
+
+.clock-digit-slot:not(.v51-animating) .clock-digit-current {
+  position: absolute !important;
+}
+
+/* ---------------- FLIP ----------------
+   Old digit folds away first, new digit follows it in.
+   Deliberately ~1.2 s for a readable mechanical flip. */
+.clock-digit-slot.v51-flip .clock-digit-old {
+  animation: v51FlipOld 1.20s cubic-bezier(.42,0,.58,1) both;
+}
+.clock-digit-slot.v51-flip .clock-digit-new {
+  animation: v51FlipNew 1.20s cubic-bezier(.42,0,.30,1) both;
+}
+
+@keyframes v51FlipOld {
+  0%   { transform: perspective(700px) rotateX(0deg); opacity:1; }
+  42%  { transform: perspective(700px) rotateX(0deg); opacity:1; }
+  58%  { transform: perspective(700px) rotateX(90deg); opacity:.15; }
+  100% { transform: perspective(700px) rotateX(90deg); opacity:0; }
+}
+@keyframes v51FlipNew {
+  0%   { transform: perspective(700px) rotateX(-90deg); opacity:0; }
+  42%  { transform: perspective(700px) rotateX(-90deg); opacity:.05; }
+  58%  { transform: perspective(700px) rotateX(-90deg); opacity:.10; }
+  82%  { transform: perspective(700px) rotateX(8deg); opacity:1; }
+  100% { transform: perspective(700px) rotateX(0deg); opacity:1; }
+}
+
+/* ---------------- FADE ----------------
+   A real crossfade, intentionally slower than before. */
+.clock-digit-slot.v51-fade .clock-digit-old {
+  animation: v51FadeOld .90s ease-in-out both;
+}
+.clock-digit-slot.v51-fade .clock-digit-new {
+  animation: v51FadeNew .90s ease-in-out both;
+}
+@keyframes v51FadeOld {
+  0%   { opacity:1; }
+  45%  { opacity:.18; }
+  100% { opacity:0; }
+}
+@keyframes v51FadeNew {
+  0%   { opacity:0; }
+  35%  { opacity:.08; }
+  100% { opacity:1; }
+}
+
+/* ---------------- SLIDE ----------------
+   Old digit exits downward; new digit enters from above. */
+.clock-digit-slot.v51-slide {
+  overflow: hidden !important;
+}
+.clock-digit-slot.v51-slide .clock-digit-old {
+  animation: v51SlideOld 1.00s cubic-bezier(.25,.72,.25,1) both;
+}
+.clock-digit-slot.v51-slide .clock-digit-new {
+  animation: v51SlideNew 1.00s cubic-bezier(.25,.72,.25,1) both;
+}
+@keyframes v51SlideOld {
+  0%   { transform:translate3d(0,0,0); opacity:1; }
+  55%  { transform:translate3d(0,.72em,0); opacity:0; }
+  100% { transform:translate3d(0,.72em,0); opacity:0; }
+}
+@keyframes v51SlideNew {
+  0%   { transform:translate3d(0,-.72em,0); opacity:0; }
+  32%  { transform:translate3d(0,-.72em,0); opacity:0; }
+  100% { transform:translate3d(0,0,0); opacity:1; }
+}
+
+/* Disable every previous whole-group/per-digit animation generation. */
+#hours.v48-flip, #minutes.v48-flip,
+#hours.v48-fade, #minutes.v48-fade,
+#hours.v48-slide, #minutes.v48-slide,
+.clock-digit.v50-flip,
+.clock-digit.v50-fade,
+.clock-digit.v50-slide {
+  animation: none !important;
+}
+
 </style>
 </head>
 <body>
@@ -1477,9 +1614,9 @@ body.pseudo-fullscreen #app {
     </header>
 
     <section id="clock" class="clock text-backdrop" aria-label="Pontos idő">
-      <span id="hours"><span class="clock-digit">1</span><span class="clock-digit">4</span></span>
+      <span id="hours"><span class="clock-digit-slot" data-value="1"><span class="clock-digit-current">1</span></span><span class="clock-digit-slot" data-value="4"><span class="clock-digit-current">4</span></span></span><span class="clock-digit">4</span></span>
       <span id="colonSpacer" class="colon-spacer" aria-hidden="true"></span>
-      <span id="minutes"><span class="clock-digit">3</span><span class="clock-digit">7</span></span>
+      <span id="minutes"><span class="clock-digit-slot" data-value="3"><span class="clock-digit-current">3</span></span><span class="clock-digit-slot" data-value="7"><span class="clock-digit-current">7</span></span></span><span class="clock-digit">7</span></span>
     </section>
 
     <div id="clockSeparator" class="clock-separator" aria-hidden="true">
@@ -2814,49 +2951,97 @@ function updateCalendarWeek(now = new Date()) {
 }
 
 
-function v50EnsureDigitNodes(group, text) {
+function v51BuildDigitSlots(group, text) {
   if (!group) return [];
-  let digits = Array.from(group.querySelectorAll(".clock-digit"));
+  let slots = Array.from(group.querySelectorAll(".clock-digit-slot"));
 
-  if (digits.length !== text.length) {
+  if (slots.length !== text.length) {
     group.textContent = "";
-    digits = [];
+    slots = [];
+
     for (let i = 0; i < text.length; i++) {
-      const digit = document.createElement("span");
-      digit.className = "clock-digit";
-      digit.textContent = text[i];
-      group.appendChild(digit);
-      digits.push(digit);
+      const slot = document.createElement("span");
+      slot.className = "clock-digit-slot";
+
+      const current = document.createElement("span");
+      current.className = "clock-digit-current";
+      current.textContent = text[i];
+
+      slot.appendChild(current);
+      group.appendChild(slot);
+      slots.push(slot);
     }
   }
-  return digits;
+
+  return slots;
 }
 
-function v50AnimateDigit(digit, newChar, mode) {
-  if (!digit || digit.textContent === newChar) return;
+function v51FinishDigit(slot, newChar) {
+  if (!slot) return;
+  slot.classList.remove("v51-flip", "v51-fade", "v51-slide", "v51-animating");
+  slot.innerHTML = "";
 
-  digit.classList.remove("v50-flip", "v50-fade", "v50-slide");
-  digit.textContent = newChar;
+  const current = document.createElement("span");
+  current.className = "clock-digit-current";
+  current.textContent = newChar;
+  slot.appendChild(current);
 
-  if (mode === "none") return;
-
-  /* Only the digit that actually changes gets an animation class. */
-  void digit.offsetWidth;
-  digit.classList.add("v50-" + mode);
-
-  clearTimeout(digit._v50AnimationTimer);
-  digit._v50AnimationTimer = setTimeout(function () {
-    digit.classList.remove("v50-flip", "v50-fade", "v50-slide");
-  }, 600);
+  slot.dataset.value = newChar;
 }
 
-function v50SetClockPart(group, newText) {
+function v51AnimateDigit(slot, newChar, mode) {
+  if (!slot) return;
+
+  const current =
+    slot.querySelector(".clock-digit-current") ||
+    slot.querySelector(".clock-digit-new");
+
+  const oldChar = current ? current.textContent : (slot.dataset.value || "");
+
+  /* Absolutely no DOM/class change for a digit whose value did not change. */
+  if (oldChar === newChar) return;
+
+  clearTimeout(slot._v51Timer);
+
+  if (mode === "none") {
+    v51FinishDigit(slot, newChar);
+    return;
+  }
+
+  slot.classList.remove("v51-flip", "v51-fade", "v51-slide", "v51-animating");
+  slot.innerHTML = "";
+
+  const oldLayer = document.createElement("span");
+  oldLayer.className = "clock-digit-old";
+  oldLayer.textContent = oldChar;
+
+  const newLayer = document.createElement("span");
+  newLayer.className = "clock-digit-new";
+  newLayer.textContent = newChar;
+
+  slot.appendChild(oldLayer);
+  slot.appendChild(newLayer);
+
+  /* Flush only this one changed digit before starting its two-layer animation. */
+  void slot.offsetWidth;
+
+  slot.classList.add("v51-animating", "v51-" + mode);
+
+  const duration = mode === "flip" ? 1200 : (mode === "fade" ? 900 : 1000);
+
+  slot._v51Timer = setTimeout(function () {
+    v51FinishDigit(slot, newChar);
+  }, duration + 80);
+}
+
+function v51SetClockPart(group, newText) {
   if (!group) return;
-  const digits = v50EnsureDigitNodes(group, newText);
+
+  const slots = v51BuildDigitSlots(group, newText);
   const mode = (settings && settings.clockAnimation) ? settings.clockAnimation : "none";
 
   for (let i = 0; i < newText.length; i++) {
-    v50AnimateDigit(digits[i], newText[i], mode);
+    v51AnimateDigit(slots[i], newText[i], mode);
   }
 }
 
@@ -2869,8 +3054,8 @@ function updateClock() {
   const newMinutesText = pad2(now.getMinutes());
   if (dateEl.textContent !== newDateText) dateEl.textContent = newDateText;
   if (weekdayEl.textContent !== newWeekdayText) weekdayEl.textContent = newWeekdayText;
-  v50SetClockPart(hoursEl, newHoursText);
-  v50SetClockPart(minutesEl, newMinutesText);
+  v51SetClockPart(hoursEl, newHoursText);
+  v51SetClockPart(minutesEl, newMinutesText);
   const sec = now.getSeconds();
   const ms = now.getMilliseconds();
   if (settings.secondsFormat === "TENTH") {

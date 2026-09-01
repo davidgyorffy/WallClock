@@ -1,4 +1,4 @@
-const CACHE_NAME = "wallclock-v50";
+const CACHE_NAME = "wallclock-v51";
 const APP_FILES = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", event => {
