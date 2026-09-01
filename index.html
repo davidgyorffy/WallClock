@@ -1354,6 +1354,47 @@ body.pseudo-fullscreen #app {
   #hours, #minutes { animation:none !important; }
 }
 
+
+/* v49 – both floating controls truly almost invisible on iPad */
+#fullscreenButton,
+#settingsButton,
+#androidControls #fullscreenButton,
+#androidControls #settingsButton {
+  opacity: .035 !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+#fullscreenButton:hover,
+#settingsButton:hover,
+#androidControls #fullscreenButton:hover,
+#androidControls #settingsButton:hover {
+  opacity: .06 !important;
+}
+
+#fullscreenButton:focus,
+#settingsButton:focus,
+#fullscreenButton:active,
+#settingsButton:active,
+#androidControls #fullscreenButton:focus,
+#androidControls #settingsButton:focus,
+#androidControls #fullscreenButton:active,
+#androidControls #settingsButton:active {
+  opacity: .18 !important;
+  color: #ffffff !important;
+}
+
+
+#calendarWeek.calendar-week {
+  font-size: var(--calendar-week-size, 48px) !important;
+}
+
 </style>
 </head>
 <body>
@@ -2438,7 +2479,7 @@ body.pseudo-fullscreen #app {
     onclick="toggleFullscreen()">⛶</button>
   <button id="settingsButton" type="button"
     aria-label="Beállítások" title="Beállítások"
-    onclick="(function(){var p=document.getElementById('settingsPanel');if(!p)return;var h=p.classList.contains('hidden');if(h){p.classList.remove('hidden');p.style.display='block';}else{p.classList.add('hidden');p.style.display='none';}})()">⚙</button>
+    onclick="(function(){var p=document.getElementById('settingsPanel');if(!p)return;var h=p.classList.contains('hidden');if(h){p.classList.remove('hidden');p.style.display='block';}else{p.classList.add('hidden');p.style.display='none';}})()">⚙︎</button>
 </div>
 
 
@@ -3553,6 +3594,7 @@ function applySettingsToUI() {
   app.style.setProperty("--calendar-week-font-x", settings.calendarWeekFontScaleX / 100);
   app.style.setProperty("--calendar-week-font-y", settings.calendarWeekFontScaleY / 100);
   app.style.setProperty("--calendar-week-size", `${settings.calendarWeekSize}px`);
+  calendarWeek.style.fontSize = `${settings.calendarWeekSize}px`;
   app.style.setProperty("--calendar-week-x", `${settings.calendarWeekX}px`);
   app.style.setProperty("--calendar-week-y", `${settings.calendarWeekY}vh`);
   showCalendarWeek.checked = settings.showCalendarWeek;
@@ -3870,6 +3912,7 @@ function v48ApplyRangeNow(el) {
       calendarWeekFontScaleYValue.textContent = v + "%"; break;
     case "calendarWeekSize":
       app.style.setProperty("--calendar-week-size", v + "px");
+      calendarWeek.style.fontSize = v + "px";
       calendarWeekSizeValue.textContent = v + " px"; break;
     case "clockSize":
       app.style.setProperty("--clock-scale", v/100);
@@ -3932,6 +3975,8 @@ function v48PersistRange(el) {
   separatorShape, separatorMode, separatorSize, separatorX, separatorY, separatorGap,
   showSeconds, secondsFontFamily, secondsFontScaleX, secondsFontScaleY, secondsFormat, secondsSize, secondsX, secondsY,
   headerSize, headerY, weatherSize, weatherX, weatherY,
+  calendarWeekFontScaleX, calendarWeekFontScaleY, calendarWeekSize,
+  calendarWeekX, calendarWeekY,
   bgColor, textBackdropOpacity, dayBrightness, nightBrightness, beepSound, beepVolume
 ].forEach(el => {
   if (!el) return;
@@ -3953,6 +3998,25 @@ function v48PersistRange(el) {
   el.addEventListener("change", saveSettings);
 });
 
+
+
+/* v49 – explicit Calendar Week size fallback for older iPad Safari */
+if (calendarWeekSize) {
+  calendarWeekSize.addEventListener("input", function () {
+    const value = Number(calendarWeekSize.value);
+    settings.calendarWeekSize = value;
+    if (calendarWeekSizeValue) calendarWeekSizeValue.textContent = value + " px";
+    if (calendarWeek) calendarWeek.style.fontSize = value + "px";
+    if (app) app.style.setProperty("--calendar-week-size", value + "px");
+  }, { passive: true });
+
+  calendarWeekSize.addEventListener("change", function () {
+    const value = Number(calendarWeekSize.value);
+    settings.calendarWeekSize = value;
+    localStorage.setItem("calendarWeekSizePx", String(value));
+    if (calendarWeek) calendarWeek.style.fontSize = value + "px";
+  });
+}
 
 document.addEventListener("pointerdown", unlockAudio, { once: true });
 document.addEventListener("touchstart", unlockAudio, { once: true });
