@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=69">
+  <link rel="manifest" href="./manifest.json?v=73">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -297,6 +297,32 @@ body { min-height: 100vh; }
   font-size: clamp(22px, 3.2vw, 42px);
   font-weight: 700;
 }
+
+
+/* v73 unified WEATHER module */
+.weather-unified{display:flex;flex-direction:column;align-items:center;gap:4px;overflow:visible}
+.weather-unified .weather-data-row{display:flex;align-items:center;justify-content:center;gap:.28em;white-space:nowrap;transform-origin:center center;min-height:1.15em;will-change:transform}
+.weather-unified .weather-current-row{font-size:clamp(34px,5vw,72px);font-weight:800}
+.weather-unified .weather-text{display:inline!important;margin:0!important;font-size:1em!important;font-weight:inherit!important}
+.weather-unified .weather-slash{opacity:.72;margin:0 .08em}
+.weather-unified .weather-row-text{display:inline-block;line-height:1.05}
+.weather-unified .weather-row-icon,.weather-unified .weather-detail-icon{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:1.25em;height:1.25em;filter:drop-shadow(0 7px 10px rgba(0,0,0,.46));perspective:500px;transform-style:preserve-3d}
+.weather-unified .weather-detail-icon svg{width:100%;height:100%;overflow:visible;transform-style:preserve-3d}
+.weather-unified #weatherUvRow,.weather-unified #weatherAirRow,.weather-unified #weatherPollenRow,.weather-unified #weatherRainRow{font-size:32px;font-weight:700}
+.weather-unified .weather-uv-icon .uv-rays{transform-origin:50px 50px;animation:v73UvSpin 13s linear infinite}
+.weather-unified .weather-uv-icon .uv-core{transform-origin:50px 50px;animation:v73UvPulse 3.2s ease-in-out infinite;filter:drop-shadow(0 0 9px rgba(255,218,60,.65))}
+.weather-unified .weather-air-icon .air-streams{animation:v73AirFlow 3.8s ease-in-out infinite}
+.weather-unified .weather-air-icon .air-particle{animation:v73Particle 3s ease-in-out infinite}.weather-unified .weather-air-icon .p2{animation-delay:1.2s}
+.weather-unified .weather-pollen-icon .pollen-main{transform-origin:50px 50px;animation:v73PollenFloat 5s ease-in-out infinite}
+.weather-unified .weather-rain-icon .rain-cloud{animation:v73Cloud3d 4.4s ease-in-out infinite;transform-origin:50px 50px}.weather-unified .detail-rain-drop{animation:v73RainDrop 1.35s linear infinite}.weather-unified .d2{animation-delay:.28s}.weather-unified .d3{animation-delay:.56s}
+@keyframes v73UvSpin{from{transform:rotateZ(0deg) rotateX(8deg)}to{transform:rotateZ(360deg) rotateX(8deg)}}
+@keyframes v73UvPulse{0%,100%{transform:translateZ(0) scale(.96)}50%{transform:translateZ(12px) scale(1.07)}}
+@keyframes v73AirFlow{0%,100%{transform:translateX(-4px) rotateY(-8deg)}50%{transform:translateX(5px) rotateY(8deg)}}
+@keyframes v73Particle{0%,100%{opacity:.25;transform:translate(-7px,5px) scale(.7)}50%{opacity:1;transform:translate(8px,-4px) scale(1.2)}}
+@keyframes v73PollenFloat{0%,100%{transform:translateY(3px) rotateX(8deg) rotateZ(-4deg)}50%{transform:translateY(-6px) translateZ(14px) rotateX(-8deg) rotateZ(8deg)}}
+@keyframes v73Cloud3d{0%,100%{transform:translateY(2px) rotateY(-6deg)}50%{transform:translateY(-4px) translateZ(10px) rotateY(7deg)}}
+@keyframes v73RainDrop{0%{opacity:0;transform:translateY(-5px) scale(.85)}20%{opacity:1}100%{opacity:0;transform:translateY(14px) scale(1)}}
+@media (prefers-reduced-motion: reduce){.weather-unified .weather-detail-icon *{animation:none!important}}
 
 .hidden-display { display: none !important; }
 
@@ -2120,9 +2146,15 @@ body.pseudo-fullscreen #app {
 @font-face{font-family:"WallClockFont462";src:url("./fonts/Woodcutter Optical Army.ttf") format("truetype");font-display:swap;}
 @font-face{font-family:"WallClockFont463";src:url("./fonts/Xillian Regular.otf") format("opentype");font-display:swap;}
 @font-face{font-family:"WallClockFont464";src:url("./fonts/zoia-stencil.ttf") format("truetype");font-display:swap;}
+
+/* v70 manual MP3 selection */
+#customSoundInput{opacity:.38;pointer-events:none;filter:grayscale(1)}
+#customSoundInput.manual-active{opacity:1;pointer-events:auto;filter:none}
+#customSoundInput.manual-active::file-selector-button{background:#b9f6c8!important;color:#102515!important;border-color:#8dde9f!important}
+#customSoundInput.manual-active::-webkit-file-upload-button{background:#b9f6c8!important;color:#102515!important;border-color:#8dde9f!important}
 </style>
 </head>
-<body data-wallclock-version="69">
+<body data-wallclock-version="73">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2153,12 +2185,27 @@ body.pseudo-fullscreen #app {
       <span id="seconds">00</span>
     </section>
 
-    <section id="weather" class="weather text-backdrop" aria-label="Időjárás">
-      <div class="weather-main">
-        <span id="weatherIcon" class="weather-icon" aria-hidden="true"></span>
-        <span id="temperature">--°C</span>
+    <section id="weather" class="weather text-backdrop weather-unified" aria-label="Időjárás">
+      <div id="weatherCurrentRow" class="weather-data-row weather-current-row">
+        <span id="weatherIcon" class="weather-icon weather-row-icon" aria-hidden="true"></span>
+        <span class="weather-row-text"><span id="temperature">--°C</span><span class="weather-slash"> / </span><span id="weatherText" class="weather-text">Időjárás betöltése…</span></span>
       </div>
-      <div id="weatherText" class="weather-text">Időjárás betöltése…</div>
+      <div id="weatherUvRow" class="weather-data-row">
+        <span class="weather-detail-icon weather-uv-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="uvg" cx="40%" cy="35%"><stop offset="0" stop-color="#fff7ad"/><stop offset=".55" stop-color="#ffd735"/><stop offset="1" stop-color="#f29d00"/></radialGradient></defs><g class="uv-rays"><path d="M50 3v16M50 81v16M3 50h16M81 50h16M17 17l12 12M71 71l12 12M83 17L71 29M29 71L17 83" stroke="#ffe35a" stroke-width="7" stroke-linecap="round"/></g><circle class="uv-core" cx="50" cy="50" r="27" fill="url(#uvg)"/><text x="50" y="58" text-anchor="middle" font-size="25" font-weight="900" fill="#6a4300">UV</text></svg></span>
+        <span id="weatherUvText" class="weather-row-text">UV-index: -- / SPF --</span>
+      </div>
+      <div id="weatherAirRow" class="weather-data-row">
+        <span class="weather-detail-icon weather-air-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><linearGradient id="airg" x1="0" x2="1"><stop stop-color="#87e8ff"/><stop offset="1" stop-color="#3e9dff"/></linearGradient></defs><g class="air-streams" fill="none" stroke="url(#airg)" stroke-width="8" stroke-linecap="round"><path d="M9 32h54c18 0 18-20 4-20-8 0-12 5-12 10"/><path d="M9 50h73c17 0 17 24-1 24-9 0-13-6-13-12"/><path d="M9 68h38"/></g><circle class="air-particle p1" cx="24" cy="25" r="4" fill="#c8f5ff"/><circle class="air-particle p2" cx="77" cy="42" r="3" fill="#c8f5ff"/></svg></span>
+        <span id="weatherAirText" class="weather-row-text">Levegőminőség: -- / --</span>
+      </div>
+      <div id="weatherPollenRow" class="weather-data-row">
+        <span class="weather-detail-icon weather-pollen-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="polg"><stop offset="0" stop-color="#fff8a4"/><stop offset=".65" stop-color="#dfff52"/><stop offset="1" stop-color="#79bb35"/></radialGradient></defs><g class="pollen-main"><circle cx="50" cy="50" r="20" fill="url(#polg)"/><g fill="#bce74b"><circle cx="50" cy="18" r="8"/><circle cx="50" cy="82" r="8"/><circle cx="18" cy="50" r="8"/><circle cx="82" cy="50" r="8"/><circle cx="28" cy="28" r="7"/><circle cx="72" cy="28" r="7"/><circle cx="28" cy="72" r="7"/><circle cx="72" cy="72" r="7"/></g><circle cx="44" cy="45" r="3" fill="#658f2b"/><circle cx="58" cy="54" r="3" fill="#658f2b"/></g></svg></span>
+        <span id="weatherPollenText" class="weather-row-text">Pollen: -- / --</span>
+      </div>
+      <div id="weatherRainRow" class="weather-data-row">
+        <span class="weather-detail-icon weather-rain-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><linearGradient id="clg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e8f5ff"/><stop offset="1" stop-color="#6e8fa8"/></linearGradient></defs><g class="rain-cloud"><path d="M24 60h53c13 0 18-18 7-25-5-3-11-3-16 0-5-17-29-20-39-6-15-2-22 9-20 19 1 7 6 12 15 12z" fill="url(#clg)"/></g><g fill="#46b7ff"><path class="detail-rain-drop d1" d="M30 67c0 0-7 10-7 16a7 7 0 0014 0c0-6-7-16-7-16z"/><path class="detail-rain-drop d2" d="M51 67c0 0-7 10-7 16a7 7 0 0014 0c0-6-7-16-7-16z"/><path class="detail-rain-drop d3" d="M72 67c0 0-7 10-7 16a7 7 0 0014 0c0-6-7-16-7-16z"/></g></svg></span>
+        <span id="weatherRainText" class="weather-row-text">Eső: --% / -- mm</span>
+      </div>
     </section>
 
 <section id="gammaRadiation" class="gamma-radiation text-backdrop" aria-label="Gamma háttérsugárzás">
@@ -2175,7 +2222,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v69</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v73</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -4109,6 +4156,44 @@ body.pseudo-fullscreen #app {
 <label>Mérete <span id="weatherSizeValue">100%</span><input id="weatherSize" type="range" min="70" max="140" value="100"></label>
 <label>V-pozíció <span id="weatherYValue">0 px</span><input id="weatherY" type="range" min="-30" max="30" value="0"></label>
 <label>H-pozíció <span id="weatherXValue">0 px</span><input id="weatherX" type="range" min="-400" max="400" value="0"></label>
+</div>
+<div class="subgroup"><h4>WEATHER adatsorok</h4>
+<label class="check-row"><input id="showWeatherCurrentRow" type="checkbox" checked><span>Aktuális időjárás sor</span></label>
+<label class="check-row"><input id="showWeatherUvRow" type="checkbox" checked><span>UV-index / SPF</span></label>
+<label class="check-row"><input id="showWeatherAirRow" type="checkbox" checked><span>Levegőminőség</span></label>
+<label class="check-row"><input id="showWeatherPollenRow" type="checkbox" checked><span>Pollen</span></label>
+<label class="check-row"><input id="showWeatherRainRow" type="checkbox" checked><span>Eső</span></label>
+<p style="opacity:.7;font-size:12px;line-height:1.35">Közös betűtípus, Bold és szín a WEATHER modul fenti beállításaiból. Minden sor mérete és helyzete külön állítható.</p>
+</div>
+<div class="subgroup"><h4>Aktuális időjárás sor</h4>
+<label>Szöveg mérete <span id="wxCurrentTextSizeValue">100%</span><input id="wxCurrentTextSize" type="range" min="40" max="180" value="100"></label>
+<label>Ikon mérete <span id="wxCurrentIconSizeValue">100%</span><input id="wxCurrentIconSize" type="range" min="40" max="220" value="100"></label>
+<label>H-pozíció <span id="wxCurrentXValue">0 px</span><input id="wxCurrentX" type="range" min="-500" max="500" value="0"></label>
+<label>V-pozíció <span id="wxCurrentYValue">0 px</span><input id="wxCurrentY" type="range" min="-350" max="350" value="0"></label>
+</div>
+<div class="subgroup"><h4>UV-index / SPF sor</h4>
+<label>Szöveg mérete <span id="wxUvTextSizeValue">100%</span><input id="wxUvTextSize" type="range" min="40" max="180" value="100"></label>
+<label>Ikon mérete <span id="wxUvIconSizeValue">100%</span><input id="wxUvIconSize" type="range" min="40" max="220" value="100"></label>
+<label>H-pozíció <span id="wxUvXValue">0 px</span><input id="wxUvX" type="range" min="-500" max="500" value="0"></label>
+<label>V-pozíció <span id="wxUvYValue">0 px</span><input id="wxUvY" type="range" min="-350" max="350" value="0"></label>
+</div>
+<div class="subgroup"><h4>Levegőminőség sor</h4>
+<label>Szöveg mérete <span id="wxAirTextSizeValue">100%</span><input id="wxAirTextSize" type="range" min="40" max="180" value="100"></label>
+<label>Ikon mérete <span id="wxAirIconSizeValue">100%</span><input id="wxAirIconSize" type="range" min="40" max="220" value="100"></label>
+<label>H-pozíció <span id="wxAirXValue">0 px</span><input id="wxAirX" type="range" min="-500" max="500" value="0"></label>
+<label>V-pozíció <span id="wxAirYValue">0 px</span><input id="wxAirY" type="range" min="-350" max="350" value="0"></label>
+</div>
+<div class="subgroup"><h4>Pollen sor</h4>
+<label>Szöveg mérete <span id="wxPollenTextSizeValue">100%</span><input id="wxPollenTextSize" type="range" min="40" max="180" value="100"></label>
+<label>Ikon mérete <span id="wxPollenIconSizeValue">100%</span><input id="wxPollenIconSize" type="range" min="40" max="220" value="100"></label>
+<label>H-pozíció <span id="wxPollenXValue">0 px</span><input id="wxPollenX" type="range" min="-500" max="500" value="0"></label>
+<label>V-pozíció <span id="wxPollenYValue">0 px</span><input id="wxPollenY" type="range" min="-350" max="350" value="0"></label>
+</div>
+<div class="subgroup"><h4>Eső sor</h4>
+<label>Szöveg mérete <span id="wxRainTextSizeValue">100%</span><input id="wxRainTextSize" type="range" min="40" max="180" value="100"></label>
+<label>Ikon mérete <span id="wxRainIconSizeValue">100%</span><input id="wxRainIconSize" type="range" min="40" max="220" value="100"></label>
+<label>H-pozíció <span id="wxRainXValue">0 px</span><input id="wxRainX" type="range" min="-500" max="500" value="0"></label>
+<label>V-pozíció <span id="wxRainYValue">0 px</span><input id="wxRainY" type="range" min="-350" max="350" value="0"></label>
 </div></section>
 <section class="settings-group">
   <h3>Calendar Week</h3>
@@ -5111,106 +5196,21 @@ body.pseudo-fullscreen #app {
 </section>
 
 <section class="settings-group"><h3>Óránkénti hangjelzés</h3>
-<label>Hang kiválasztása listából<select id="beepSound"><option value="none">No List Sound</option>
-<option value="casioClassic">CASIO Classic</option>
+<label>Hang kiválasztása listából<select id="beepSound">
+<option value="manual">** Manual Selection **</option>
 <option value="airplaneChime">Airplane Chime</option>
-<option value="echoedChime">Echoed Chime</option>
-<option value="chimeFuturistic">Chime Futuristic</option>
-<option value="crosswalk">Crosswalk</option>
-<option value="meow">Meow</option>
+<option value="beep2xHiLow">Beep 2x Hi-Low</option>
 <option value="beepBeepEchoV1">Beep Beep Echo V1</option>
 <option value="beepBeepEchoV2">Beep Beep Echo V2</option>
 <option value="bells">Bells</option>
+<option value="casioClassic">CASIO Classic</option>
+<option value="chimeFuturistic">Chime Futuristic</option>
+<option value="crosswalk">Crosswalk</option>
+<option value="echoedChime">Echoed Chime</option>
 <option value="kalimba">Kalimba</option>
+<option value="meow">Meow</option>
 <option value="windShrine">Wind Shrine</option>
-<option value="beep2xHiLow">Beep 2x Hi-Low</option>
-<option value="digital01">Digital 01 — Classic Casio</option>
-          <option value="digital02">Digital 02 — High Beep</option>
-          <option value="digital03">Digital 03 — Short Pip</option>
-          <option value="digital04">Digital 04 — Twin Pip</option>
-          <option value="digital05">Digital 05 — Sharp Quartz</option>
-          <option value="digital06">Digital 06 — Retro Watch</option>
-          <option value="digital07">Digital 07 — Thin Beep</option>
-          <option value="digital08">Digital 08 — Bright Pip</option>
-          <option value="digital09">Digital 09 — Quartz Chirp</option>
-          <option value="digital10">Digital 10 — Mini Alarm</option>
-          <option value="digital11">Digital 11 — LCD Watch</option>
-          <option value="digital12">Digital 12 — Retro Twin</option>
-          <option value="digital13">Digital 13 — High Quartz</option>
-          <option value="digital14">Digital 14 — Fast Pip</option>
-          <option value="digital15">Digital 15 — Clean Digital</option>
-          <option value="digital16">Digital 16 — Thin Twin</option>
-          <option value="digital17">Digital 17 — 90s Watch</option>
-          <option value="digital18">Digital 18 — Pocket Beep</option>
-          <option value="digital19">Digital 19 — LCD Chirp</option>
-          <option value="digital20">Digital 20 — Retro Hour</option>
-
-          <option value="digital">Digitális klasszikus</option>
-          <option value="soft">Lágy pittyenés</option>
-          <option value="sharp">Éles pittyenés</option>
-          <option value="retro">Retro kvarcóra</option>
-          <option value="high">Magas hang</option>
-          <option value="low">Mély hang</option>
-          <option value="doubletone">Kétfrekvenciás</option>
-          <option value="square">Szögletes elektronikus</option>
-          <option value="sine">Tiszta szinusz</option>
-          <option value="chirp">Rövid csiripelés</option>
-          <option value="bell1">Mini harang</option>
-          <option value="bell2">Fényes harang</option>
-          <option value="pulse">Digitális pulzus</option>
-          <option value="pager">Pager</option>
-          <option value="watch">Karóra</option>
-          <option value="microwave">Mikrohullámú sütő</option>
-          <option value="terminal">Terminál</option>
-          <option value="arcade">Arcade</option>
-          <option value="soft2">Lágy magas</option>
-          <option value="soft3">Lágy mély</option>
-          <option value="ping">Ping</option>
-          <option value="ping2">Dupla ping</option>
-          <option value="click">Elektronikus click</option>
-          <option value="beacon">Beacon</option>
-          <option value="alarm">Rövid alarm</option>
-          <option value="metallic">Fémes pittyenés</option>
-          <option value="glass">Üveges ping</option>
-          <option value="warm">Meleg tónus</option>
-          <option value="cold">Hideg tónus</option>
-          <option value="tiny">Apró kvarc</option>
-          <option value="bold">Erős digitális</option>
-          <option value="retro2">Retro 2</option>
-          <option value="retro3">Retro 3</option>
-          <option value="sweep">Frekvenciasöprés</option>
-          <option value="sweepdown">Lefelé söprés</option>
-          <option value="crystal">Kristály</option>
-<option value="wood">Fa koppanás</option>
-<option value="sonar">Sonar</option>
-<option value="radar">Radar</option>
-<option value="morse">Morse</option>
-<option value="doorbell">Mini csengő</option>
-<option value="elevator">Lift jelzés</option>
-<option value="gameboy">8-bit</option>
-<option value="laser">Laser</option>
-<option value="coin">Érme</option>
-<option value="blip">Blip</option>
-<option value="bloop">Bloop</option>
-<option value="tick">Digitális tick</option>
-<option value="tock">Digitális tock</option>
-<option value="chime">Chime</option>
-<option value="chime2">Chime 2</option>
-<option value="hollow">Üreges</option>
-<option value="resonant">Rezonáns</option>
-<option value="bright">Nagyon fényes</option>
-<option value="muted">Tompa</option>
-<option value="pulse2">Pulzus 2</option>
-<option value="pulse3">Pulzus 3</option>
-<option value="shortwave">Rövidhullám</option>
-<option value="modem">Retro modem</option>
-<option value="robot">Robot</option>
-<option value="satellite">Műhold</option>
-<option value="drop">Csepp</option>
-<option value="spark">Szikra</option>
-<option value="minimal">Minimal</option>
-<option value="classic2">Klasszikus 2</option>
-        </select></label>
+</select></label>
 <label class="sound-volume-control">Hangerő <span id="beepVolumeValue">100%</span>
   <input id="beepVolume" type="range" min="0" max="100" step="1" value="100">
 </label>
@@ -5255,29 +5255,6 @@ body.pseudo-fullscreen #app {
 <audio id="hourlyAudioPlayer" preload="auto" playsinline webkit-playsinline style="display:none"></audio>
 <script>try { localStorage.removeItem(["hourly","Beep"].join("")); } catch (_) {}
 
-const DIGITAL_BEEPS = {
-
-  digital01: { type:"square", f1:2048, f2:2048, dur:0.055, gap:0.035, gain:0.34, attack:0.001, release:0.018 },
-  digital02: { type:"square", f1:2400, f2:2400, dur:0.045, gap:0.030, gain:0.32, attack:0.001, release:0.015 },
-  digital03: { type:"square", f1:1800, f2:1800, dur:0.035, gap:0.028, gain:0.30, attack:0.001, release:0.012 },
-  digital04: { type:"square", f1:2200, f2:2200, dur:0.040, gap:0.022, gain:0.33, attack:0.001, release:0.014 },
-  digital05: { type:"square", f1:2600, f2:2600, dur:0.038, gap:0.024, gain:0.30, attack:0.001, release:0.012 },
-  digital06: { type:"square", f1:1950, f2:2250, dur:0.050, gap:0.028, gain:0.32, attack:0.001, release:0.016 },
-  digital07: { type:"square", f1:2850, f2:2850, dur:0.030, gap:0.025, gain:0.28, attack:0.001, release:0.010 },
-  digital08: { type:"square", f1:2350, f2:2550, dur:0.042, gap:0.024, gain:0.31, attack:0.001, release:0.013 },
-  digital09: { type:"square", f1:2050, f2:2450, dur:0.036, gap:0.026, gain:0.30, attack:0.001, release:0.012 },
-  digital10: { type:"square", f1:2300, f2:2300, dur:0.060, gap:0.020, gain:0.34, attack:0.001, release:0.016 },
-  digital11: { type:"square", f1:1750, f2:2050, dur:0.048, gap:0.025, gain:0.31, attack:0.001, release:0.014 },
-  digital12: { type:"square", f1:2150, f2:2550, dur:0.044, gap:0.020, gain:0.32, attack:0.001, release:0.013 },
-  digital13: { type:"square", f1:3000, f2:3000, dur:0.032, gap:0.025, gain:0.27, attack:0.001, release:0.010 },
-  digital14: { type:"square", f1:2500, f2:2750, dur:0.030, gap:0.018, gain:0.29, attack:0.001, release:0.010 },
-  digital15: { type:"square", f1:2000, f2:2000, dur:0.052, gap:0.026, gain:0.33, attack:0.001, release:0.015 },
-  digital16: { type:"square", f1:2650, f2:2650, dur:0.034, gap:0.020, gain:0.28, attack:0.001, release:0.010 },
-  digital17: { type:"square", f1:2100, f2:2350, dur:0.046, gap:0.024, gain:0.32, attack:0.001, release:0.014 },
-  digital18: { type:"square", f1:1850, f2:2150, dur:0.040, gap:0.030, gain:0.31, attack:0.001, release:0.013 },
-  digital19: { type:"square", f1:2450, f2:2250, dur:0.037, gap:0.022, gain:0.30, attack:0.001, release:0.012 },
-  digital20: { type:"square", f1:2050, f2:2600, dur:0.050, gap:0.022, gain:0.33, attack:0.001, release:0.015 },
-};
 
 const WEATHER_CACHE_VERSION = 16;
 
@@ -5443,7 +5420,7 @@ const settings = {
   calendarWeekFontBold: localStorage.getItem("calendarWeekFontBold") === "true",
   calendarWeekFontScaleX: Number(localStorage.getItem("calendarWeekFontScaleX") || 100),
   calendarWeekFontScaleY: Number(localStorage.getItem("calendarWeekFontScaleY") || 100),
-  calendarWeekSize: Math.min(400, Math.max(20, Number(localStorage.getItem("calendarWeekSizePx") || 48))),
+  calendarWeekSize: Math.min(400, Math.max(20, Number(localStorage.getItem("calendarWeekSizePx") || localStorage.getItem("calendarWeekSize") || 48))),
   calendarWeekX: Number(localStorage.getItem("calendarWeekX") || 0),
   calendarWeekY: Number(localStorage.getItem("calendarWeekY") || 0),
   backgroundColor: localStorage.getItem("backgroundColor") || "#000000",
@@ -5848,7 +5825,7 @@ function v43PlayManualSound() {
 }
 
 function v43PlaySelectedSound() {
-  const selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+  const selected = (settings && settings.beepSound) ? settings.beepSound : "manual";
 
   /* v59: list sound has priority. Manual file is used only with No List Sound. */
   if (selected === "none") {
@@ -6211,7 +6188,7 @@ function v62ArmPersistentAudio() {
 }
 
 function v62SourceForListSound(selected) {
-  if (!selected || selected === "none") return "";
+  if (!selected || selected === "manual") return "";
 
   var sourceEl = null;
   if (selected === "casioClassic") {
@@ -6254,32 +6231,21 @@ function v62PlayPersistentSource(src) {
 }
 
 function v62PlayListSoundOnce(selected) {
-  if (!selected || selected === "none") return false;
-
+  if (!selected || selected === "manual") return false;
   var mediaSrc = v62SourceForListSound(selected);
-  if (mediaSrc) {
-    return v62PlayPersistentSource(mediaSrc);
-  }
-
-  /* Synthesized list sounds use the already-unlocked WebAudio context. */
-  return v61PlaySynthListSoundOnce(selected);
+  return mediaSrc ? v62PlayPersistentSource(mediaSrc) : false;
 }
 
 function v62PlayConfiguredHourlySound() {
-  var selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+  var selected = (settings && settings.beepSound) ? settings.beepSound : "manual";
 
-  if (selected !== "none") {
+  /* The list always has priority. Manual file is used only in Manual Selection mode. */
+  if (selected !== "manual") {
     return v62PlayListSoundOnce(selected);
   }
 
-  if (customSoundObjectUrl) {
-    return v62PlayPersistentSource(customSoundObjectUrl);
-  }
-
-  if (v43ManualAudioUrl) {
-    return v62PlayPersistentSource(v43ManualAudioUrl);
-  }
-
+  if (customSoundObjectUrl) return v62PlayPersistentSource(customSoundObjectUrl);
+  if (v43ManualAudioUrl) return v62PlayPersistentSource(v43ManualAudioUrl);
   return false;
 }
 
@@ -6302,128 +6268,7 @@ function v61EnsureAudioContext() {
   }
 }
 
-function v61PlaySynthListSoundOnce(selected) {
-  if (!v61EnsureAudioContext() || !audioContext) return false;
-
-  var t = audioContext.currentTime + 0.03;
-  var vol = 0.48 * (settings.beepVolume / 100);
-
-  if (playDigitalWatchPattern(selected, t, vol)) return true;
-
-  switch (selected) {
-    case "digital":
-      tone(t, 1550, 0.12, "square", vol); break;
-    case "soft": tone(t, 900, 0.14, "sine", vol * 0.75); break;
-    case "sharp": tone(t, 2200, 0.075, "square", vol); break;
-    case "retro":
-      tone(t, 1250, 0.11, "square", vol * 0.95);
-      tone(t + 0.055, 980, 0.07, "square", vol * 0.55); break;
-    case "high": tone(t, 2600, 0.09, "sine", vol); break;
-    case "low": tone(t, 620, 0.15, "square", vol); break;
-    case "doubletone":
-      tone(t, 1200, 0.12, "sine", vol * 0.8);
-      tone(t, 1800, 0.12, "sine", vol * 0.55); break;
-    case "square": tone(t, 1500, 0.12, "square", vol); break;
-    case "sine": tone(t, 1550, 0.13, "sine", vol); break;
-    case "chirp": tone(t, 900, 0.13, "sine", vol * 0.9, 2300); break;
-    case "bell1":
-      tone(t, 1300, 0.18, "sine", vol * 0.75);
-      tone(t, 2600, 0.10, "sine", vol * 0.32); break;
-    case "bell2":
-      tone(t, 1750, 0.16, "sine", vol * 0.8);
-      tone(t, 3500, 0.08, "sine", vol * 0.28); break;
-    case "pulse":
-      tone(t, 1400, 0.05, "square", vol);
-      tone(t + 0.07, 1400, 0.05, "square", vol); break;
-    case "pager":
-      tone(t, 1150, 0.08, "square", vol);
-      tone(t + 0.09, 1450, 0.08, "square", vol); break;
-    case "watch": tone(t, 2050, 0.055, "square", vol * 0.8); break;
-    case "microwave":
-      tone(t, 980, 0.12, "square", vol);
-      tone(t + 0.13, 980, 0.12, "square", vol); break;
-    case "terminal": tone(t, 880, 0.07, "square", vol * 0.8); break;
-    case "arcade":
-      tone(t, 700, 0.07, "square", vol);
-      tone(t + 0.07, 1200, 0.07, "square", vol); break;
-    case "soft2": tone(t, 1750, 0.15, "sine", vol * 0.65); break;
-    case "soft3": tone(t, 720, 0.18, "sine", vol * 0.7); break;
-    case "ping": tone(t, 2000, 0.11, "sine", vol * 0.78); break;
-    case "ping2":
-      tone(t, 1900, 0.08, "sine", vol * 0.75);
-      tone(t + 0.09, 2400, 0.08, "sine", vol * 0.55); break;
-    case "click": tone(t, 3200, 0.035, "square", vol * 0.75); break;
-    case "beacon":
-      tone(t, 800, 0.10, "sine", vol * 0.7);
-      tone(t + 0.09, 1600, 0.10, "sine", vol * 0.65); break;
-    case "alarm":
-      tone(t, 1800, 0.06, "square", vol);
-      tone(t + 0.07, 1100, 0.06, "square", vol); break;
-    case "metallic":
-      tone(t, 2400, 0.10, "triangle", vol * 0.8);
-      tone(t, 3100, 0.08, "sine", vol * 0.35); break;
-    case "glass":
-      tone(t, 2800, 0.16, "sine", vol * 0.6);
-      tone(t, 4200, 0.10, "sine", vol * 0.2); break;
-    case "warm": tone(t, 780, 0.15, "triangle", vol * 0.8); break;
-    case "cold": tone(t, 2300, 0.11, "triangle", vol * 0.78); break;
-    case "gameboy":
-      tone(t, 1046, 0.055, "square", vol * 0.8);
-      tone(t + 0.055, 1318, 0.055, "square", vol * 0.8); break;
-    case "laser": tone(t, 2800, 0.16, "sawtooth", vol * 0.65, 450); break;
-    case "coin":
-      tone(t, 987, 0.05, "square", vol * 0.75);
-      tone(t + 0.055, 1975, 0.10, "square", vol * 0.75); break;
-    case "blip": tone(t, 1350, 0.045, "square", vol * 0.75); break;
-    case "bloop": tone(t, 520, 0.08, "sine", vol * 0.8); break;
-    case "tick": tone(t, 2600, 0.018, "square", vol * 0.55); break;
-    case "tock": tone(t, 880, 0.035, "square", vol * 0.65); break;
-    case "chime":
-      tone(t, 1200, 0.15, "sine", vol * 0.65);
-      tone(t + 0.08, 1800, 0.18, "sine", vol * 0.5); break;
-    case "chime2":
-      tone(t, 900, 0.12, "sine", vol * 0.6);
-      tone(t + 0.08, 1350, 0.12, "sine", vol * 0.55);
-      tone(t + 0.16, 1800, 0.16, "sine", vol * 0.45); break;
-    case "hollow": tone(t, 580, 0.20, "sine", vol * 0.6); break;
-    case "resonant":
-      tone(t, 720, 0.18, "triangle", vol * 0.72);
-      tone(t, 1440, 0.13, "sine", vol * 0.22); break;
-    case "bright": tone(t, 3100, 0.09, "sine", vol * 0.68); break;
-    case "muted": tone(t, 700, 0.07, "square", vol * 0.45); break;
-    case "pulse2":
-      tone(t, 1000, 0.045, "square", vol * 0.72);
-      tone(t + 0.07, 1500, 0.045, "square", vol * 0.72); break;
-    case "pulse3":
-      tone(t, 900, 0.04, "square", vol * 0.65);
-      tone(t + 0.06, 1300, 0.04, "square", vol * 0.65);
-      tone(t + 0.12, 1700, 0.04, "square", vol * 0.65); break;
-    case "shortwave":
-      tone(t, 2500, 0.04, "square", vol * 0.55);
-      tone(t + 0.05, 1700, 0.04, "square", vol * 0.55); break;
-    case "modem":
-      tone(t, 900, 0.04, "square", vol * 0.65);
-      tone(t + 0.04, 1300, 0.04, "square", vol * 0.65);
-      tone(t + 0.08, 1700, 0.04, "square", vol * 0.65); break;
-    case "robot":
-      tone(t, 620, 0.06, "square", vol * 0.85);
-      tone(t + 0.055, 930, 0.06, "square", vol * 0.85); break;
-    case "satellite":
-      tone(t, 2400, 0.04, "sine", vol * 0.72);
-      tone(t + 0.07, 1800, 0.04, "sine", vol * 0.62); break;
-    case "drop": tone(t, 1500, 0.16, "sine", vol * 0.62, 520); break;
-    case "spark":
-      tone(t, 4200, 0.025, "square", vol * 0.55);
-      tone(t + 0.03, 3000, 0.025, "square", vol * 0.46); break;
-    case "minimal": tone(t, 1250, 0.065, "sine", vol * 0.62); break;
-    case "classic2":
-      tone(t, 1000, 0.10, "square", vol * 0.82);
-      tone(t, 2000, 0.07, "square", vol * 0.30); break;
-    default:
-      tone(t, 1550, 0.12, "square", vol); break;
-  }
-  return true;
-}
+function v61PlaySynthListSoundOnce(selected) { return false; }
 
 function v61PlayListSoundOnce(selected) {
   if (!selected || selected === "none") return false;
@@ -6440,7 +6285,7 @@ function v61PlayListSoundOnce(selected) {
 }
 
 function v61PlayConfiguredHourlySound() {
-  var selected = (settings && settings.beepSound) ? settings.beepSound : "none";
+  var selected = (settings && settings.beepSound) ? settings.beepSound : "manual";
 
   if (selected !== "none") {
     return v61PlayListSoundOnce(selected);
@@ -6461,7 +6306,11 @@ function playDoubleBeep() {
 function maybeHourlyChime(now) {
   const hour = now.getHours();
   if (!settings.chimeHours.includes(hour) || !settings.chimeDays.includes(now.getDay())) return;
-  if (now.getMinutes() !== 0 || now.getSeconds() > 2) return;
+
+  /* v70: old iPad/Safari can throttle timers. The old 0–2 second window
+     caused missed chimes. The whole first minute is now accepted; the
+     hourly key still guarantees exactly one playback per hour. */
+  if (now.getMinutes() !== 0) return;
 
   const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${hour}`;
   if (lastChimedHourKey === key) return;
@@ -6996,8 +6845,8 @@ function applySettingsToUI() {
   calendarWeekFontScaleXValue.textContent = `${settings.calendarWeekFontScaleX}%`;
   calendarWeekFontScaleYValue.textContent = `${settings.calendarWeekFontScaleY}%`;
   calendarWeekSizeValue.textContent = `${settings.calendarWeekSize} px`;
-  calendarWeekXValue.textContent = `${settings.calendarWeekX}`;
-  calendarWeekYValue.textContent = `${settings.calendarWeekY}`;
+  calendarWeekXValue.textContent = `${settings.calendarWeekX} px`;
+  calendarWeekYValue.textContent = `${settings.calendarWeekY} px`;
   updateBackgroundVisuals();
   applyBoldState(topline, settings.headerFontFamily, settings.headerFontBold);
   applyBoldState(clockEl, settings.clockFontFamily, settings.fontBold);
@@ -7011,6 +6860,8 @@ function applySettingsToUI() {
   settings.clockFontFamily=normalizeFontSelection(clockFontFamily,settings.clockFontFamily);
   settings.weatherFontFamily=normalizeFontSelection(weatherFontFamily,settings.weatherFontFamily);
   settings.secondsFontFamily=normalizeFontSelection(secondsFontFamily,settings.secondsFontFamily);
+  settings.calendarWeekFontFamily=normalizeFontSelection(calendarWeekFontFamily,settings.calendarWeekFontFamily);
+  localStorage.setItem("calendarWeekFontFamily", settings.calendarWeekFontFamily);
 
   showHeader.checked = settings.showHeader;
   showClock.checked = settings.showClock;
@@ -7184,6 +7035,8 @@ function saveSettings() {
     if (key !== "backgroundImage") localStorage.setItem(key, value);
   }
   localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+    localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
+  localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
 
   applySettingsToUI();
 }
@@ -7232,6 +7085,32 @@ async function toggleFullscreen() {
 }
 
 closeSettings.addEventListener("click", () => {
+  /* v71: snapshot Calendar Week independently before closing settings. */
+  try {
+    localStorage.setItem("showCalendarWeek", settings.showCalendarWeek ? "true" : "false");
+    localStorage.setItem("calendarWeekFontFamily", settings.calendarWeekFontFamily);
+    localStorage.setItem("calendarWeekFontBold", settings.calendarWeekFontBold ? "true" : "false");
+    localStorage.setItem("calendarWeekFontScaleX", String(settings.calendarWeekFontScaleX));
+    localStorage.setItem("calendarWeekFontScaleY", String(settings.calendarWeekFontScaleY));
+    localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+    localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
+
+    const cwx = document.getElementById("calendarWeekX");
+    const cwy = document.getElementById("calendarWeekY");
+    if (cwx && cwy) {
+      const x = Number(cwx.value);
+      const y = Number(cwy.value);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        settings.calendarWeekX = x;
+        settings.calendarWeekY = y;
+        localStorage.setItem("calendarWeekX", String(x));
+        localStorage.setItem("calendarWeekY", String(y));
+        localStorage.setItem("v42pos_calendar_x", String(x));
+        localStorage.setItem("v42pos_calendar_y", String(y));
+      }
+    }
+  } catch (_) {}
+
   settingsPanel.classList.add("hidden");
   settingsPanel.style.removeProperty("display");
   settingsPanel.style.removeProperty("visibility");
@@ -7352,6 +7231,7 @@ function v48PersistRange(el) {
   if (!key) return;
   if (el.id === "calendarWeekSize") {
     localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+    localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
   } else {
     localStorage.setItem(key, String(settings[key]));
   }
@@ -7405,6 +7285,7 @@ if (calendarWeekSize) {
     const value = Number(calendarWeekSize.value);
     settings.calendarWeekSize = value;
     localStorage.setItem("calendarWeekSizePx", String(value));
+    localStorage.setItem("calendarWeekSize", String(value));
     if (calendarWeek) calendarWeek.style.fontSize = value + "px";
     if (calendarWeekText) calendarWeekText.style.fontSize = value + "px";
   });
@@ -7439,6 +7320,7 @@ if (calendarWeekSize) {
   calendarWeekSize.addEventListener("change", function () {
     renderCWSize();
     localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
+    localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
   }, true);
 
   renderCWSize();
@@ -7480,6 +7362,7 @@ setInterval(updateWeather, 10 * 60 * 1000);
 });
 
 customSoundInput.addEventListener("change", () => {
+  if (!beepSound || beepSound.value !== "manual") return;
   const file = customSoundInput.files && customSoundInput.files[0];
   if (!file) return;
 
@@ -7586,8 +7469,8 @@ customSoundDelete.addEventListener("click", () => {
 });
 
 function v62PreviewSelectedListSound() {
-  var selected = beepSound ? beepSound.value : "none";
-  if (selected === "none") return;
+  var selected = beepSound ? beepSound.value : "manual";
+  if (selected === "manual") return;
   v62PlayListSoundOnce(selected);
 }
 
@@ -7606,7 +7489,8 @@ beepSound.addEventListener("change", function () {
   settings.beepSound = beepSound.value;
   localStorage.setItem("beepSound", settings.beepSound);
 
-  if (settings.beepSound !== "none") {
+  v70UpdateManualSoundUI();
+  if (settings.beepSound !== "manual") {
     v62PreviewSelectedListSound();
   }
 });
@@ -7985,7 +7869,7 @@ console.warn("Gamma radiation update failed:",err)
   renderMute();
 })();
 
-apply();update();setInterval(update,60*60*1000);window.addEventListener("online",function(){setTimeout(update,2500)});
+apply();update();setInterval(update,5*60*1000);window.addEventListener("online",function(){setTimeout(update,2500)});
 })();
 
 /* v63 touch-first slider engine */
@@ -8234,9 +8118,23 @@ window.addEventListener("DOMContentLoaded", function () {
 
   function getSaved(name, axis, fallback) {
     const raw = localStorage.getItem(key(name, axis));
-    if (raw === null || raw === "") return fallback;
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : fallback;
+    if (raw !== null && raw !== "") {
+      const n = Number(raw);
+      if (Number.isFinite(n)) return n;
+    }
+
+    /* v71: Calendar Week had two historical position key systems.
+       Migrate the stable legacy values instead of falling back to a new default. */
+    if (name === "calendar") {
+      const legacyKey = axis === "x" ? "calendarWeekX" : "calendarWeekY";
+      const legacyRaw = localStorage.getItem(legacyKey);
+      if (legacyRaw !== null && legacyRaw !== "") {
+        const legacy = Number(legacyRaw);
+        if (Number.isFinite(legacy)) return legacy;
+      }
+    }
+
+    return fallback;
   }
 
   function limits() {
@@ -8281,6 +8179,16 @@ window.addEventListener("DOMContentLoaded", function () {
     if (persist) {
       localStorage.setItem(key(c.name, "x"), String(x));
       localStorage.setItem(key(c.name, "y"), String(y));
+
+      /* v71: keep Calendar Week's original stable keys synchronized too. */
+      if (c.name === "calendar") {
+        localStorage.setItem("calendarWeekX", String(x));
+        localStorage.setItem("calendarWeekY", String(y));
+        try {
+          settings.calendarWeekX = x;
+          settings.calendarWeekY = y;
+        } catch (_) {}
+      }
     }
   }
 
@@ -8295,7 +8203,10 @@ window.addEventListener("DOMContentLoaded", function () {
 
       const x = getSaved(c.name, "x", defs[c.name].x);
       const y = getSaved(c.name, "y", defs[c.name].y);
-      apply(c, x, y, false);
+
+      /* v71: Calendar Week migration is persisted immediately so future
+         index.html replacements cannot send it back to the natural default. */
+      apply(c, x, y, c.name === "calendar");
 
       xi.addEventListener("input", function () {
         apply(c, Number(xi.value), Number(yi.value), false);
@@ -8336,7 +8247,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=69", { updateViaCache: "none" })
+      .register("./service-worker.js?v=73", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
@@ -8380,5 +8291,96 @@ if ("serviceWorker" in navigator) {
 })();
 
 </script>
+
+<script>
+function v70UpdateManualSoundUI(){
+  var sel=document.getElementById("beepSound");
+  var inp=document.getElementById("customSoundInput");
+  if(!sel||!inp)return;
+  var active=sel.value==="manual";
+  inp.disabled=!active;
+  if(active)inp.classList.add("manual-active");
+  else inp.classList.remove("manual-active");
+}
+document.addEventListener("DOMContentLoaded",function(){
+  var sel=document.getElementById("beepSound");
+  if(sel){
+    var valid=false;
+    for(var i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===settings.beepSound){valid=true;break}
+    }
+    if(!valid){
+      settings.beepSound="manual";
+      localStorage.setItem("beepSound","manual");
+      sel.value="manual";
+    }
+  }
+  v70UpdateManualSoundUI();
+});
+</script>
+
+
+<script>
+/* v73 WEATHER detail rows: Open-Meteo, Törökvész 47.5357 / 19.0068 */
+(function(){
+  var WXKEY='weatherExtraV73';
+  var defaults={
+    showCurrent:true,showUv:true,showAir:true,showPollen:true,showRain:true,
+    currentTextSize:100,currentIconSize:100,currentX:0,currentY:0,
+    uvTextSize:100,uvIconSize:100,uvX:0,uvY:0,
+    airTextSize:100,airIconSize:100,airX:0,airY:0,
+    pollenTextSize:100,pollenIconSize:100,pollenX:0,pollenY:0,
+    rainTextSize:100,rainIconSize:100,rainX:0,rainY:0
+  };
+  var state={};
+  try{state=Object.assign({},defaults,JSON.parse(localStorage.getItem(WXKEY)||'{}'));}catch(_){state=Object.assign({},defaults)}
+  function el(id){return document.getElementById(id)}
+  var rows={current:el('weatherCurrentRow'),uv:el('weatherUvRow'),air:el('weatherAirRow'),pollen:el('weatherPollenRow'),rain:el('weatherRainRow')};
+  var icons={current:el('weatherIcon'),uv:document.querySelector('#weatherUvRow .weather-detail-icon'),air:document.querySelector('#weatherAirRow .weather-detail-icon'),pollen:document.querySelector('#weatherPollenRow .weather-detail-icon'),rain:document.querySelector('#weatherRainRow .weather-detail-icon')};
+  function save(){try{localStorage.setItem(WXKEY,JSON.stringify(state))}catch(_){}}
+  function applyOne(name){
+    var r=rows[name],ic=icons[name]; if(!r)return;
+    var cap=name.charAt(0).toUpperCase()+name.slice(1);
+    r.classList.toggle('hidden-display',!state['show'+cap]);
+    r.style.fontSize='calc('+state[name+'TextSize']+'% * 0.32px)';
+    r.style.transform='translate('+state[name+'X']+'px,'+state[name+'Y']+'px)';
+    if(ic){ic.style.width=(1.25*state[name+'IconSize']/100)+'em';ic.style.height=(1.25*state[name+'IconSize']/100)+'em'}
+  }
+  function apply(){['current','uv','air','pollen','rain'].forEach(applyOne)}
+  var bindings=[
+    ['showWeatherCurrentRow','showCurrent','check'],['showWeatherUvRow','showUv','check'],['showWeatherAirRow','showAir','check'],['showWeatherPollenRow','showPollen','check'],['showWeatherRainRow','showRain','check'],
+    ['wxCurrentTextSize','currentTextSize'],['wxCurrentIconSize','currentIconSize'],['wxCurrentX','currentX'],['wxCurrentY','currentY'],
+    ['wxUvTextSize','uvTextSize'],['wxUvIconSize','uvIconSize'],['wxUvX','uvX'],['wxUvY','uvY'],
+    ['wxAirTextSize','airTextSize'],['wxAirIconSize','airIconSize'],['wxAirX','airX'],['wxAirY','airY'],
+    ['wxPollenTextSize','pollenTextSize'],['wxPollenIconSize','pollenIconSize'],['wxPollenX','pollenX'],['wxPollenY','pollenY'],
+    ['wxRainTextSize','rainTextSize'],['wxRainIconSize','rainIconSize'],['wxRainX','rainX'],['wxRainY','rainY']
+  ];
+  function valueLabel(id,v){var o=el(id+'Value');if(!o)return;if(/TextSize|IconSize/.test(id))o.textContent=v+'%';else o.textContent=v+' px'}
+  bindings.forEach(function(b){var c=el(b[0]);if(!c)return;if(b[2]==='check'){c.checked=!!state[b[1]]}else{c.value=state[b[1]];valueLabel(b[0],state[b[1]])}
+    c.addEventListener(b[2]==='check'?'change':'input',function(){state[b[1]]=b[2]==='check'?c.checked:Number(c.value);valueLabel(b[0],state[b[1]]);save();apply()});
+  });
+  apply();
+
+  function nearestIndex(times){if(!times||!times.length)return 0;var now=Date.now(),best=0,d=1e99;for(var i=0;i<times.length;i++){var t=Date.parse(times[i]);var q=Math.abs(t-now);if(q<d){d=q;best=i}}return best}
+  function huAqi(a){a=Number(a);if(!isFinite(a))return '--';if(a<=20)return 'JÓ';if(a<=40)return 'MEGFELELŐ';if(a<=60)return 'MÉRSÉKELT';if(a<=80)return 'ROSSZ';if(a<=100)return 'NAGYON ROSSZ';return 'RENDKÍVÜL ROSSZ'}
+  function spfForUv(u){u=Number(u);if(!isFinite(u))return '--';if(u<3)return '15';if(u<6)return '30';if(u<8)return '50';return '50+'}
+  function pollenLevel(v){v=Number(v);if(!isFinite(v)||v<=0)return 'NINCS / ALACSONY';if(v<10)return 'ALACSONY';if(v<50)return 'KÖZEPES';if(v<100)return 'MAGAS';return 'NAGYON MAGAS'}
+  var pollenNames={alder_pollen:'ÉGER',birch_pollen:'NYÍR',grass_pollen:'FŰFÉLÉK',mugwort_pollen:'ÜRÖM',olive_pollen:'OLAJFA',ragweed_pollen:'PARLAGFŰ'};
+  function getHourly(h,key,i){return h&&h[key]&&h[key][i]!=null?Number(h[key][i]):NaN}
+  function fetchJson(url){return fetch(url,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})}
+  function updateDetails(){
+    var lat=47.5357,lon=19.0068;
+    var aq='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+lat+'&longitude='+lon+'&hourly=uv_index,european_aqi,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen&timezone=Europe%2FBudapest&forecast_days=1';
+    var rain='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=precipitation_probability,precipitation&timezone=Europe%2FBudapest&forecast_days=1';
+    fetchJson(aq).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time);var uv=getHourly(h,'uv_index',i),aqi=getHourly(h,'european_aqi',i);el('weatherUvText').textContent='UV-index: '+(isFinite(uv)?uv.toFixed(1).replace('.',','):'--')+' / SPF '+spfForUv(uv);el('weatherAirText').textContent='Levegőminőség: '+(isFinite(aqi)?Math.round(aqi):'--')+' / '+huAqi(aqi);
+      var bestKey=null,best=-1;Object.keys(pollenNames).forEach(function(k){var v=getHourly(h,k,i);if(isFinite(v)&&v>best){best=v;bestKey=k}});if(bestKey){el('weatherPollenText').textContent='Pollen: '+pollenNames[bestKey]+' / '+pollenLevel(best)}else{el('weatherPollenText').textContent='Pollen: -- / --'}
+      try{localStorage.setItem('weatherExtraDataV73',JSON.stringify({uv:el('weatherUvText').textContent,air:el('weatherAirText').textContent,pollen:el('weatherPollenText').textContent,t:Date.now()}))}catch(_){ }
+    }).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherExtraDataV73')||'{}');if(c.uv)el('weatherUvText').textContent=c.uv;if(c.air)el('weatherAirText').textContent=c.air;if(c.pollen)el('weatherPollenText').textContent=c.pollen}catch(_){}});
+    fetchJson(rain).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time),maxP=0,sum=0;for(var j=i;j<Math.min(i+2,(h.time||[]).length);j++){var p=getHourly(h,'precipitation_probability',j),mm=getHourly(h,'precipitation',j);if(isFinite(p))maxP=Math.max(maxP,p);if(isFinite(mm))sum+=mm}el('weatherRainText').textContent='Eső: '+Math.round(maxP)+'% / '+sum.toFixed(1).replace('.',',')+' mm';try{localStorage.setItem('weatherRainDataV73',JSON.stringify({text:el('weatherRainText').textContent,t:Date.now()}))}catch(_){}}).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherRainDataV73')||'{}');if(c.text)el('weatherRainText').textContent=c.text}catch(_){}});
+  }
+  updateDetails();setInterval(updateDetails,15*60*1000);
+})();
+</script>
+
 </body>
 </html>
