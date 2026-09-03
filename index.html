@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=73">
+  <link rel="manifest" href="./manifest.json?v=74">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2152,9 +2152,30 @@ body.pseudo-fullscreen #app {
 #customSoundInput.manual-active{opacity:1;pointer-events:auto;filter:none}
 #customSoundInput.manual-active::file-selector-button{background:#b9f6c8!important;color:#102515!important;border-color:#8dde9f!important}
 #customSoundInput.manual-active::-webkit-file-upload-button{background:#b9f6c8!important;color:#102515!important;border-color:#8dde9f!important}
+
+/* v74 – fully independent WEATHER rows */
+#weather.weather-unified{
+  position:absolute!important; inset:0!important; width:100%!important; height:100%!important;
+  margin:0!important; padding:0!important; transform:none!important; overflow:visible!important;
+  display:block!important; pointer-events:none!important; text-align:left!important;
+  --weather-x:0px!important; --weather-y:0px!important; --weather-scale:1!important;
+  --weather-font-x:1!important; --weather-font-y:1!important;
+}
+#weather.weather-unified .weather-data-row{
+  position:absolute!important; left:50%!important; top:50%!important; margin:0!important;
+  display:flex; align-items:center; justify-content:center; gap:.28em; white-space:nowrap;
+  transform-origin:center center; min-height:0!important; line-height:1!important;
+}
+#weather.weather-unified .weather-row-text{
+  display:inline-block!important; line-height:1.05!important; transform-origin:center center!important;
+}
+#weather.weather-unified #weatherText.weather-text{display:inline!important;margin:0!important;font-size:1em!important;line-height:inherit!important;position:static!important}
+.weather-settings-v74>h3{font-size:18px!important;letter-spacing:.10em!important}
+.weather-settings-v74 .wx-v74-subgroup h4{text-transform:uppercase}
+
 </style>
 </head>
-<body data-wallclock-version="73">
+<body data-wallclock-version="74">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2222,7 +2243,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v73</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v74</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -3679,10 +3700,7 @@ body.pseudo-fullscreen #app {
 <label>Pöttyök V-távolság <span id="separatorGapValue">24 px</span><input id="separatorGap" type="range" min="4" max="300" value="24"></label>
 </div></section>
 
-<section class="settings-group"><h3>Időjárás</h3>
-<label class="check-row"><input id="showWeather" type="checkbox" checked><span>Időjárás</span></label>
-<label class="check-row"><input id="showWeatherText" type="checkbox" checked><span>Időjárás szöveges felirata</span></label>
-<label>Szöveg színe <input id="weatherTextColor" type="color" value="#ffffff"></label>
+<section class="settings-group weather-settings-v74"><h3>WEATHER</h3>
 <div class="font-select-row"><label>Betűtípus<select id="weatherFontFamily">
 <option value="WallClockFont001">212 Dreamery Sans</option>
 <option value="WallClockFont002">212 Warmheart Sans</option>
@@ -4148,53 +4166,69 @@ body.pseudo-fullscreen #app {
 <option value="WallClockFont462">Woodcutter Optical Army</option>
 <option value="WallClockFont463">Xillian Regular</option>
 <option value="WallClockFont464">Zoia Stencil</option>
-</select></label><button id="weatherBoldToggle" class="mini-toggle font-bold-toggle" type="button">B</button></div>
-<div class="subgroup"><h4>Karakterbeállítás</h4>
+</select></label></div>
+<label>Szöveg színe <input id="weatherTextColor" type="color" value="#ffffff"></label>
+<label>Transzparencia <span id="weatherModuleOpacityValue">100%</span><input id="weatherModuleOpacity" type="range" min="0" max="100" step="1" value="100"></label>
 
-<label>Karakterszélesség <span id="weatherFontScaleXValue">100%</span><input id="weatherFontScaleX" type="range" min="50" max="160" value="100"></label>
-<label>Karaktermagasság <span id="weatherFontScaleYValue">100%</span><input id="weatherFontScaleY" type="range" min="50" max="160" value="100"></label>
-<label>Mérete <span id="weatherSizeValue">100%</span><input id="weatherSize" type="range" min="70" max="140" value="100"></label>
-<label>V-pozíció <span id="weatherYValue">0 px</span><input id="weatherY" type="range" min="-30" max="30" value="0"></label>
-<label>H-pozíció <span id="weatherXValue">0 px</span><input id="weatherX" type="range" min="-400" max="400" value="0"></label>
+<div class="subgroup wx-v74-subgroup"><h4>HŐMÉRSÉKLET</h4>
+<label class="check-row"><input id="showWeatherCurrentRow" type="checkbox" checked><span>Hőmérséklet</span></label>
+<label class="check-row"><input id="showWeatherDescription" type="checkbox" checked><span>Időjárás szöveges felirata</span></label>
+<label>Ikon mérete <span id="wxCurrentIconSizeValue">72 px</span><input id="wxCurrentIconSize" type="range" min="24" max="240" step="1" value="72"></label>
+<label>Karakter méret <span id="wxCurrentTextSizeValue">32 px</span><input id="wxCurrentTextSize" type="range" min="14" max="120" step="1" value="32"></label>
+<label>Karakterszélesség <span id="wxCurrentTextScaleXValue">100%</span><input id="wxCurrentTextScaleX" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Karaktermagasság <span id="wxCurrentTextScaleYValue">100%</span><input id="wxCurrentTextScaleY" type="range" min="50" max="180" step="1" value="100"></label>
+<label>V-pozíció <span id="wxCurrentYValue">0 px</span><input id="wxCurrentY" type="range" min="-420" max="420" step="1" value="0"></label>
+<label>H-pozíció <span id="wxCurrentXValue">0 px</span><input id="wxCurrentX" type="range" min="-700" max="700" step="1" value="0"></label>
 </div>
-<div class="subgroup"><h4>WEATHER adatsorok</h4>
-<label class="check-row"><input id="showWeatherCurrentRow" type="checkbox" checked><span>Aktuális időjárás sor</span></label>
-<label class="check-row"><input id="showWeatherUvRow" type="checkbox" checked><span>UV-index / SPF</span></label>
+<div class="subgroup wx-v74-subgroup"><h4>UV-INDEX / SPF</h4>
+<label class="check-row"><input id="showWeatherUvRow" type="checkbox" checked><span>UV-Index</span></label>
+<label>Ikon mérete <span id="wxUvIconSizeValue">72 px</span><input id="wxUvIconSize" type="range" min="24" max="240" step="1" value="72"></label>
+<label>Karakter méret <span id="wxUvTextSizeValue">32 px</span><input id="wxUvTextSize" type="range" min="14" max="120" step="1" value="32"></label>
+<label>Karakterszélesség <span id="wxUvTextScaleXValue">100%</span><input id="wxUvTextScaleX" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Karaktermagasság <span id="wxUvTextScaleYValue">100%</span><input id="wxUvTextScaleY" type="range" min="50" max="180" step="1" value="100"></label>
+<label>V-pozíció <span id="wxUvYValue">0 px</span><input id="wxUvY" type="range" min="-420" max="420" step="1" value="0"></label>
+<label>H-pozíció <span id="wxUvXValue">0 px</span><input id="wxUvX" type="range" min="-700" max="700" step="1" value="0"></label>
+</div>
+<div class="subgroup wx-v74-subgroup"><h4>LEVEGŐMINŐSÉG</h4>
 <label class="check-row"><input id="showWeatherAirRow" type="checkbox" checked><span>Levegőminőség</span></label>
+<label>Ikon mérete <span id="wxAirIconSizeValue">72 px</span><input id="wxAirIconSize" type="range" min="24" max="240" step="1" value="72"></label>
+<label>Karakter méret <span id="wxAirTextSizeValue">32 px</span><input id="wxAirTextSize" type="range" min="14" max="120" step="1" value="32"></label>
+<label>Karakterszélesség <span id="wxAirTextScaleXValue">100%</span><input id="wxAirTextScaleX" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Karaktermagasság <span id="wxAirTextScaleYValue">100%</span><input id="wxAirTextScaleY" type="range" min="50" max="180" step="1" value="100"></label>
+<label>V-pozíció <span id="wxAirYValue">0 px</span><input id="wxAirY" type="range" min="-420" max="420" step="1" value="0"></label>
+<label>H-pozíció <span id="wxAirXValue">0 px</span><input id="wxAirX" type="range" min="-700" max="700" step="1" value="0"></label>
+</div>
+<div class="subgroup wx-v74-subgroup"><h4>POLLEN</h4>
 <label class="check-row"><input id="showWeatherPollenRow" type="checkbox" checked><span>Pollen</span></label>
+<label>Ikon mérete <span id="wxPollenIconSizeValue">72 px</span><input id="wxPollenIconSize" type="range" min="24" max="240" step="1" value="72"></label>
+<label>Karakter méret <span id="wxPollenTextSizeValue">32 px</span><input id="wxPollenTextSize" type="range" min="14" max="120" step="1" value="32"></label>
+<label>Karakterszélesség <span id="wxPollenTextScaleXValue">100%</span><input id="wxPollenTextScaleX" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Karaktermagasság <span id="wxPollenTextScaleYValue">100%</span><input id="wxPollenTextScaleY" type="range" min="50" max="180" step="1" value="100"></label>
+<label>V-pozíció <span id="wxPollenYValue">0 px</span><input id="wxPollenY" type="range" min="-420" max="420" step="1" value="0"></label>
+<label>H-pozíció <span id="wxPollenXValue">0 px</span><input id="wxPollenX" type="range" min="-700" max="700" step="1" value="0"></label>
+</div>
+<div class="subgroup wx-v74-subgroup"><h4>ESŐ</h4>
 <label class="check-row"><input id="showWeatherRainRow" type="checkbox" checked><span>Eső</span></label>
-<p style="opacity:.7;font-size:12px;line-height:1.35">Közös betűtípus, Bold és szín a WEATHER modul fenti beállításaiból. Minden sor mérete és helyzete külön állítható.</p>
+<label>Ikon mérete <span id="wxRainIconSizeValue">72 px</span><input id="wxRainIconSize" type="range" min="24" max="240" step="1" value="72"></label>
+<label>Karakter méret <span id="wxRainTextSizeValue">32 px</span><input id="wxRainTextSize" type="range" min="14" max="120" step="1" value="32"></label>
+<label>Karakterszélesség <span id="wxRainTextScaleXValue">100%</span><input id="wxRainTextScaleX" type="range" min="50" max="180" step="1" value="100"></label>
+<label>Karaktermagasság <span id="wxRainTextScaleYValue">100%</span><input id="wxRainTextScaleY" type="range" min="50" max="180" step="1" value="100"></label>
+<label>V-pozíció <span id="wxRainYValue">0 px</span><input id="wxRainY" type="range" min="-420" max="420" step="1" value="0"></label>
+<label>H-pozíció <span id="wxRainXValue">0 px</span><input id="wxRainX" type="range" min="-700" max="700" step="1" value="0"></label>
 </div>
-<div class="subgroup"><h4>Aktuális időjárás sor</h4>
-<label>Szöveg mérete <span id="wxCurrentTextSizeValue">100%</span><input id="wxCurrentTextSize" type="range" min="40" max="180" value="100"></label>
-<label>Ikon mérete <span id="wxCurrentIconSizeValue">100%</span><input id="wxCurrentIconSize" type="range" min="40" max="220" value="100"></label>
-<label>H-pozíció <span id="wxCurrentXValue">0 px</span><input id="wxCurrentX" type="range" min="-500" max="500" value="0"></label>
-<label>V-pozíció <span id="wxCurrentYValue">0 px</span><input id="wxCurrentY" type="range" min="-350" max="350" value="0"></label>
+
+<!-- Legacy weather controls kept hidden only for compatibility with the older core. -->
+<div style="display:none!important" aria-hidden="true">
+  <input id="showWeather" type="checkbox" checked>
+  <input id="showWeatherText" type="checkbox" checked>
+  <button id="weatherBoldToggle" type="button">B</button>
+  <input id="weatherFontScaleX" type="range" min="50" max="160" value="100"><span id="weatherFontScaleXValue">100%</span>
+  <input id="weatherFontScaleY" type="range" min="50" max="160" value="100"><span id="weatherFontScaleYValue">100%</span>
+  <input id="weatherSize" type="range" min="70" max="140" value="100"><span id="weatherSizeValue">100%</span>
+  <input id="weatherY" type="range" min="-30" max="30" value="0"><span id="weatherYValue">0 px</span>
+  <input id="weatherX" type="range" min="-400" max="400" value="0"><span id="weatherXValue">0 px</span>
 </div>
-<div class="subgroup"><h4>UV-index / SPF sor</h4>
-<label>Szöveg mérete <span id="wxUvTextSizeValue">100%</span><input id="wxUvTextSize" type="range" min="40" max="180" value="100"></label>
-<label>Ikon mérete <span id="wxUvIconSizeValue">100%</span><input id="wxUvIconSize" type="range" min="40" max="220" value="100"></label>
-<label>H-pozíció <span id="wxUvXValue">0 px</span><input id="wxUvX" type="range" min="-500" max="500" value="0"></label>
-<label>V-pozíció <span id="wxUvYValue">0 px</span><input id="wxUvY" type="range" min="-350" max="350" value="0"></label>
-</div>
-<div class="subgroup"><h4>Levegőminőség sor</h4>
-<label>Szöveg mérete <span id="wxAirTextSizeValue">100%</span><input id="wxAirTextSize" type="range" min="40" max="180" value="100"></label>
-<label>Ikon mérete <span id="wxAirIconSizeValue">100%</span><input id="wxAirIconSize" type="range" min="40" max="220" value="100"></label>
-<label>H-pozíció <span id="wxAirXValue">0 px</span><input id="wxAirX" type="range" min="-500" max="500" value="0"></label>
-<label>V-pozíció <span id="wxAirYValue">0 px</span><input id="wxAirY" type="range" min="-350" max="350" value="0"></label>
-</div>
-<div class="subgroup"><h4>Pollen sor</h4>
-<label>Szöveg mérete <span id="wxPollenTextSizeValue">100%</span><input id="wxPollenTextSize" type="range" min="40" max="180" value="100"></label>
-<label>Ikon mérete <span id="wxPollenIconSizeValue">100%</span><input id="wxPollenIconSize" type="range" min="40" max="220" value="100"></label>
-<label>H-pozíció <span id="wxPollenXValue">0 px</span><input id="wxPollenX" type="range" min="-500" max="500" value="0"></label>
-<label>V-pozíció <span id="wxPollenYValue">0 px</span><input id="wxPollenY" type="range" min="-350" max="350" value="0"></label>
-</div>
-<div class="subgroup"><h4>Eső sor</h4>
-<label>Szöveg mérete <span id="wxRainTextSizeValue">100%</span><input id="wxRainTextSize" type="range" min="40" max="180" value="100"></label>
-<label>Ikon mérete <span id="wxRainIconSizeValue">100%</span><input id="wxRainIconSize" type="range" min="40" max="220" value="100"></label>
-<label>H-pozíció <span id="wxRainXValue">0 px</span><input id="wxRainX" type="range" min="-500" max="500" value="0"></label>
-<label>V-pozíció <span id="wxRainYValue">0 px</span><input id="wxRainY" type="range" min="-350" max="350" value="0"></label>
-</div></section>
+</section>
 <section class="settings-group">
   <h3>Calendar Week</h3>
   <label class="check-row"><input id="showCalendarWeek" type="checkbox" checked><span>Ki / Be</span></label>
@@ -8247,7 +8281,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=73", { updateViaCache: "none" })
+      .register("./service-worker.js?v=74", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
@@ -8321,43 +8355,76 @@ document.addEventListener("DOMContentLoaded",function(){
 
 
 <script>
-/* v73 WEATHER detail rows: Open-Meteo, Törökvész 47.5357 / 19.0068 */
+/* v74 WEATHER: independent rows, common font/color/opacity; Open-Meteo Törökvész */
 (function(){
-  var WXKEY='weatherExtraV73';
+  var WXKEY='weatherExtraV74';
+  var legacyKey='weatherExtraV73';
   var defaults={
-    showCurrent:true,showUv:true,showAir:true,showPollen:true,showRain:true,
-    currentTextSize:100,currentIconSize:100,currentX:0,currentY:0,
-    uvTextSize:100,uvIconSize:100,uvX:0,uvY:0,
-    airTextSize:100,airIconSize:100,airX:0,airY:0,
-    pollenTextSize:100,pollenIconSize:100,pollenX:0,pollenY:0,
-    rainTextSize:100,rainIconSize:100,rainX:0,rainY:0
+    showCurrent:true,showDescription:true,showUv:true,showAir:true,showPollen:true,showRain:true,
+    opacity:100,
+    currentTextSize:42,currentTextScaleX:100,currentTextScaleY:100,currentIconSize:88,currentX:0,currentY:135,
+    uvTextSize:32,uvTextScaleX:100,uvTextScaleY:100,uvIconSize:62,uvX:0,uvY:205,
+    airTextSize:32,airTextScaleX:100,airTextScaleY:100,airIconSize:62,airX:0,airY:255,
+    pollenTextSize:32,pollenTextScaleX:100,pollenTextScaleY:100,pollenIconSize:62,pollenX:0,pollenY:305,
+    rainTextSize:32,rainTextScaleX:100,rainTextScaleY:100,rainIconSize:62,rainX:0,rainY:355
   };
   var state={};
-  try{state=Object.assign({},defaults,JSON.parse(localStorage.getItem(WXKEY)||'{}'));}catch(_){state=Object.assign({},defaults)}
+  try{
+    var saved=JSON.parse(localStorage.getItem(WXKEY)||'null');
+    if(saved){state=Object.assign({},defaults,saved)}
+    else{
+      state=Object.assign({},defaults);
+      /* Preserve v73 visibility/size choices where they translate cleanly. */
+      var old=JSON.parse(localStorage.getItem(legacyKey)||'null');
+      if(old){
+        ['showCurrent','showUv','showAir','showPollen','showRain'].forEach(function(k){if(typeof old[k]==='boolean')state[k]=old[k]});
+      }
+    }
+  }catch(_){state=Object.assign({},defaults)}
   function el(id){return document.getElementById(id)}
+  var weather=el('weather');
   var rows={current:el('weatherCurrentRow'),uv:el('weatherUvRow'),air:el('weatherAirRow'),pollen:el('weatherPollenRow'),rain:el('weatherRainRow')};
   var icons={current:el('weatherIcon'),uv:document.querySelector('#weatherUvRow .weather-detail-icon'),air:document.querySelector('#weatherAirRow .weather-detail-icon'),pollen:document.querySelector('#weatherPollenRow .weather-detail-icon'),rain:document.querySelector('#weatherRainRow .weather-detail-icon')};
+  var texts={current:document.querySelector('#weatherCurrentRow .weather-row-text'),uv:el('weatherUvText'),air:el('weatherAirText'),pollen:el('weatherPollenText'),rain:el('weatherRainText')};
   function save(){try{localStorage.setItem(WXKEY,JSON.stringify(state))}catch(_){}}
   function applyOne(name){
-    var r=rows[name],ic=icons[name]; if(!r)return;
+    var r=rows[name],ic=icons[name],tx=texts[name]; if(!r)return;
     var cap=name.charAt(0).toUpperCase()+name.slice(1);
     r.classList.toggle('hidden-display',!state['show'+cap]);
-    r.style.fontSize='calc('+state[name+'TextSize']+'% * 0.32px)';
-    r.style.transform='translate('+state[name+'X']+'px,'+state[name+'Y']+'px)';
-    if(ic){ic.style.width=(1.25*state[name+'IconSize']/100)+'em';ic.style.height=(1.25*state[name+'IconSize']/100)+'em'}
+    r.style.fontSize=state[name+'TextSize']+'px';
+    r.style.transform='translate(-50%,-50%) translate('+state[name+'X']+'px,'+state[name+'Y']+'px)';
+    if(tx)tx.style.transform='scaleX('+(state[name+'TextScaleX']/100)+') scaleY('+(state[name+'TextScaleY']/100)+')';
+    if(ic){ic.style.width=state[name+'IconSize']+'px';ic.style.height=state[name+'IconSize']+'px'}
   }
-  function apply(){['current','uv','air','pollen','rain'].forEach(applyOne)}
+  function applyDescription(){
+    var wt=el('weatherText'),slash=document.querySelector('#weatherCurrentRow .weather-slash');
+    if(wt)wt.style.display=state.showDescription?'inline':'none';
+    if(slash)slash.style.display=state.showDescription?'inline':'none';
+  }
+  function apply(){
+    if(weather)weather.style.opacity=String(Math.max(0,Math.min(100,state.opacity))/100);
+    ['current','uv','air','pollen','rain'].forEach(applyOne);
+    applyDescription();
+  }
   var bindings=[
-    ['showWeatherCurrentRow','showCurrent','check'],['showWeatherUvRow','showUv','check'],['showWeatherAirRow','showAir','check'],['showWeatherPollenRow','showPollen','check'],['showWeatherRainRow','showRain','check'],
-    ['wxCurrentTextSize','currentTextSize'],['wxCurrentIconSize','currentIconSize'],['wxCurrentX','currentX'],['wxCurrentY','currentY'],
-    ['wxUvTextSize','uvTextSize'],['wxUvIconSize','uvIconSize'],['wxUvX','uvX'],['wxUvY','uvY'],
-    ['wxAirTextSize','airTextSize'],['wxAirIconSize','airIconSize'],['wxAirX','airX'],['wxAirY','airY'],
-    ['wxPollenTextSize','pollenTextSize'],['wxPollenIconSize','pollenIconSize'],['wxPollenX','pollenX'],['wxPollenY','pollenY'],
-    ['wxRainTextSize','rainTextSize'],['wxRainIconSize','rainIconSize'],['wxRainX','rainX'],['wxRainY','rainY']
+    ['showWeatherCurrentRow','showCurrent','check'],['showWeatherDescription','showDescription','check'],
+    ['showWeatherUvRow','showUv','check'],['showWeatherAirRow','showAir','check'],['showWeatherPollenRow','showPollen','check'],['showWeatherRainRow','showRain','check'],
+    ['weatherModuleOpacity','opacity','pct'],
+    ['wxCurrentIconSize','currentIconSize','px'],['wxCurrentTextSize','currentTextSize','px'],['wxCurrentTextScaleX','currentTextScaleX','pct'],['wxCurrentTextScaleY','currentTextScaleY','pct'],['wxCurrentY','currentY','px'],['wxCurrentX','currentX','px'],
+    ['wxUvIconSize','uvIconSize','px'],['wxUvTextSize','uvTextSize','px'],['wxUvTextScaleX','uvTextScaleX','pct'],['wxUvTextScaleY','uvTextScaleY','pct'],['wxUvY','uvY','px'],['wxUvX','uvX','px'],
+    ['wxAirIconSize','airIconSize','px'],['wxAirTextSize','airTextSize','px'],['wxAirTextScaleX','airTextScaleX','pct'],['wxAirTextScaleY','airTextScaleY','pct'],['wxAirY','airY','px'],['wxAirX','airX','px'],
+    ['wxPollenIconSize','pollenIconSize','px'],['wxPollenTextSize','pollenTextSize','px'],['wxPollenTextScaleX','pollenTextScaleX','pct'],['wxPollenTextScaleY','pollenTextScaleY','pct'],['wxPollenY','pollenY','px'],['wxPollenX','pollenX','px'],
+    ['wxRainIconSize','rainIconSize','px'],['wxRainTextSize','rainTextSize','px'],['wxRainTextScaleX','rainTextScaleX','pct'],['wxRainTextScaleY','rainTextScaleY','pct'],['wxRainY','rainY','px'],['wxRainX','rainX','px']
   ];
-  function valueLabel(id,v){var o=el(id+'Value');if(!o)return;if(/TextSize|IconSize/.test(id))o.textContent=v+'%';else o.textContent=v+' px'}
-  bindings.forEach(function(b){var c=el(b[0]);if(!c)return;if(b[2]==='check'){c.checked=!!state[b[1]]}else{c.value=state[b[1]];valueLabel(b[0],state[b[1]])}
-    c.addEventListener(b[2]==='check'?'change':'input',function(){state[b[1]]=b[2]==='check'?c.checked:Number(c.value);valueLabel(b[0],state[b[1]]);save();apply()});
+  function labelValue(id,v,type){var o=el(id+'Value');if(!o)return;o.textContent=type==='pct'?v+'%':v+' px'}
+  bindings.forEach(function(b){
+    var c=el(b[0]);if(!c)return;
+    if(b[2]==='check')c.checked=!!state[b[1]];else{c.value=state[b[1]];labelValue(b[0],state[b[1]],b[2])}
+    c.addEventListener(b[2]==='check'?'change':'input',function(){
+      state[b[1]]=b[2]==='check'?c.checked:Number(c.value);
+      if(b[2]!=='check')labelValue(b[0],state[b[1]],b[2]);
+      save();apply();
+    });
   });
   apply();
 
@@ -8374,11 +8441,28 @@ document.addEventListener("DOMContentLoaded",function(){
     var rain='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=precipitation_probability,precipitation&timezone=Europe%2FBudapest&forecast_days=1';
     fetchJson(aq).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time);var uv=getHourly(h,'uv_index',i),aqi=getHourly(h,'european_aqi',i);el('weatherUvText').textContent='UV-index: '+(isFinite(uv)?uv.toFixed(1).replace('.',','):'--')+' / SPF '+spfForUv(uv);el('weatherAirText').textContent='Levegőminőség: '+(isFinite(aqi)?Math.round(aqi):'--')+' / '+huAqi(aqi);
       var bestKey=null,best=-1;Object.keys(pollenNames).forEach(function(k){var v=getHourly(h,k,i);if(isFinite(v)&&v>best){best=v;bestKey=k}});if(bestKey){el('weatherPollenText').textContent='Pollen: '+pollenNames[bestKey]+' / '+pollenLevel(best)}else{el('weatherPollenText').textContent='Pollen: -- / --'}
-      try{localStorage.setItem('weatherExtraDataV73',JSON.stringify({uv:el('weatherUvText').textContent,air:el('weatherAirText').textContent,pollen:el('weatherPollenText').textContent,t:Date.now()}))}catch(_){ }
-    }).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherExtraDataV73')||'{}');if(c.uv)el('weatherUvText').textContent=c.uv;if(c.air)el('weatherAirText').textContent=c.air;if(c.pollen)el('weatherPollenText').textContent=c.pollen}catch(_){}});
-    fetchJson(rain).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time),maxP=0,sum=0;for(var j=i;j<Math.min(i+2,(h.time||[]).length);j++){var p=getHourly(h,'precipitation_probability',j),mm=getHourly(h,'precipitation',j);if(isFinite(p))maxP=Math.max(maxP,p);if(isFinite(mm))sum+=mm}el('weatherRainText').textContent='Eső: '+Math.round(maxP)+'% / '+sum.toFixed(1).replace('.',',')+' mm';try{localStorage.setItem('weatherRainDataV73',JSON.stringify({text:el('weatherRainText').textContent,t:Date.now()}))}catch(_){}}).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherRainDataV73')||'{}');if(c.text)el('weatherRainText').textContent=c.text}catch(_){}});
+      try{localStorage.setItem('weatherExtraDataV74',JSON.stringify({uv:el('weatherUvText').textContent,air:el('weatherAirText').textContent,pollen:el('weatherPollenText').textContent,t:Date.now()}))}catch(_){ }
+    }).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherExtraDataV74')||'{}');if(c.uv)el('weatherUvText').textContent=c.uv;if(c.air)el('weatherAirText').textContent=c.air;if(c.pollen)el('weatherPollenText').textContent=c.pollen}catch(_){}});
+    fetchJson(rain).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time),maxP=0,sum=0;for(var j=i;j<Math.min(i+2,(h.time||[]).length);j++){var p=getHourly(h,'precipitation_probability',j),mm=getHourly(h,'precipitation',j);if(isFinite(p))maxP=Math.max(maxP,p);if(isFinite(mm))sum+=mm}el('weatherRainText').textContent='Eső: '+Math.round(maxP)+'% / '+sum.toFixed(1).replace('.',',')+' mm';try{localStorage.setItem('weatherRainDataV74',JSON.stringify({text:el('weatherRainText').textContent,t:Date.now()}))}catch(_){}}).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherRainDataV74')||'{}');if(c.text)el('weatherRainText').textContent=c.text}catch(_){}});
   }
   updateDetails();setInterval(updateDetails,15*60*1000);
+})();
+</script>
+
+
+<script>
+/* v74 compatibility: legacy global WEATHER controls stay neutral and hidden. */
+(function(){
+  function neutralize(){
+    var sw=document.getElementById('showWeather'); if(sw)sw.checked=true;
+    var st=document.getElementById('showWeatherText'); if(st)st.checked=true;
+    var sx=document.getElementById('weatherFontScaleX'); if(sx)sx.value=100;
+    var sy=document.getElementById('weatherFontScaleY'); if(sy)sy.value=100;
+    var sz=document.getElementById('weatherSize'); if(sz)sz.value=100;
+    var x=document.getElementById('weatherX'); if(x)x.value=0;
+    var y=document.getElementById('weatherY'); if(y)y.value=0;
+  }
+  document.addEventListener('DOMContentLoaded',neutralize);
 })();
 </script>
 
