@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=76">
+  <link rel="manifest" href="./manifest.json?v=78">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -310,7 +310,7 @@ body { min-height: 100vh; }
 .weather-unified .weather-detail-icon svg{width:100%;height:100%;overflow:visible;transform-style:preserve-3d}
 .weather-unified #weatherUvRow,.weather-unified #weatherAirRow,.weather-unified #weatherPollenRow,.weather-unified #weatherRainRow{font-size:32px;font-weight:700}
 .weather-unified .weather-uv-icon .uv-rays{transform-origin:50px 50px;animation:v73UvSpin 13s linear infinite}
-.weather-unified .weather-uv-icon .uv-core{transform-origin:50px 50px;animation:v73UvPulse 3.2s ease-in-out infinite;filter:drop-shadow(0 0 9px rgba(255,218,60,.65))}
+.weather-unified .weather-uv-icon .uv-core{transform-origin:50px 50px;animation:v73UvPulse 3.2s ease-in-out infinite;filter:drop-shadow(0 0 9px var(--uv-glow,rgba(255,218,60,.65)))}
 .weather-unified .weather-air-icon .air-streams{animation:v73AirFlow 3.8s ease-in-out infinite}
 .weather-unified .weather-air-icon .air-particle{animation:v73Particle 3s ease-in-out infinite}.weather-unified .weather-air-icon .p2{animation-delay:1.2s}
 .weather-unified .weather-pollen-icon .pollen-main{transform-origin:50px 50px;animation:v73PollenFloat 5s ease-in-out infinite}
@@ -2226,8 +2226,8 @@ body.pseudo-fullscreen #app {
         <span class="weather-row-text"><span id="temperature">--°C</span><span class="weather-slash"> / </span><span id="weatherText" class="weather-text">Időjárás betöltése…</span></span>
       </div>
       <div id="weatherUvRow" class="weather-data-row">
-        <span class="weather-detail-icon weather-uv-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="uvg" cx="40%" cy="35%"><stop offset="0" stop-color="#fff7ad"/><stop offset=".55" stop-color="#ffd735"/><stop offset="1" stop-color="#f29d00"/></radialGradient></defs><g class="uv-rays"><path d="M50 3v16M50 81v16M3 50h16M81 50h16M17 17l12 12M71 71l12 12M83 17L71 29M29 71L17 83" stroke="#ffe35a" stroke-width="7" stroke-linecap="round"/></g><circle class="uv-core" cx="50" cy="50" r="27" fill="url(#uvg)"/><text x="50" y="58" text-anchor="middle" font-size="25" font-weight="900" fill="#6a4300">UV</text></svg></span>
-        <span id="weatherUvText" class="weather-row-text">UV-index: -- / SPF --</span>
+        <span class="weather-detail-icon weather-uv-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="uvg" cx="40%" cy="35%"><stop class="uv-stop-1" offset="0" stop-color="#fff7ad"/><stop class="uv-stop-2" offset=".55" stop-color="#ffd735"/><stop class="uv-stop-3" offset="1" stop-color="#f29d00"/></radialGradient></defs><g class="uv-rays"><path d="M50 3v16M50 81v16M3 50h16M81 50h16M17 17l12 12M71 71l12 12M83 17L71 29M29 71L17 83" stroke="#ffe35a" stroke-width="7" stroke-linecap="round"/></g><circle class="uv-core" cx="50" cy="50" r="27" fill="url(#uvg)"/><text class="uv-label" x="50" y="58" text-anchor="middle" font-size="25" font-weight="900" fill="#6a4300">UV</text></svg></span>
+        <span id="weatherUvText" class="weather-row-text">UV-index: -- / -- ( SPF -- )</span>
       </div>
       <div id="weatherAirRow" class="weather-data-row">
         <span class="weather-detail-icon weather-air-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><linearGradient id="airg" x1="0" x2="1"><stop stop-color="#87e8ff"/><stop offset="1" stop-color="#3e9dff"/></linearGradient></defs><g class="air-streams" fill="none" stroke="url(#airg)" stroke-width="8" stroke-linecap="round"><path d="M9 32h54c18 0 18-20 4-20-8 0-12 5-12 10"/><path d="M9 50h73c17 0 17 24-1 24-9 0-13-6-13-12"/><path d="M9 68h38"/></g><circle class="air-particle p1" cx="24" cy="25" r="4" fill="#c8f5ff"/><circle class="air-particle p2" cx="77" cy="42" r="3" fill="#c8f5ff"/></svg></span>
@@ -8295,7 +8295,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=76", { updateViaCache: "none" })
+      .register("./service-worker.js?v=78", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
@@ -8459,6 +8459,19 @@ document.addEventListener("DOMContentLoaded",function(){
   function nearestIndex(times){if(!times||!times.length)return 0;var now=Date.now(),best=0,d=1e99;for(var i=0;i<times.length;i++){var t=Date.parse(times[i]);var q=Math.abs(t-now);if(q<d){d=q;best=i}}return best}
   function huAqi(a){a=Number(a);if(!isFinite(a))return '--';if(a<=20)return 'JÓ';if(a<=40)return 'MEGFELELŐ';if(a<=60)return 'MÉRSÉKELT';if(a<=80)return 'ROSSZ';if(a<=100)return 'NAGYON ROSSZ';return 'RENDKÍVÜL ROSSZ'}
   function spfForUv(u){u=Number(u);if(!isFinite(u))return '--';if(u<3)return '15';if(u<6)return '30';if(u<8)return '50';return '50+'}
+  function uvCategory(u){u=Number(u);if(!isFinite(u))return '--';if(u<3)return 'ALACSONY';if(u<6)return 'MÉRSÉKELT';if(u<8)return 'MAGAS';if(u<11)return 'NAGYON MAGAS';return 'EXTRÉM'}
+  function applyUvIconColor(u){
+    var icon=document.querySelector('#weatherUvRow .weather-uv-icon');if(!icon)return;
+    u=Number(u);
+    var p;
+    if(!isFinite(u)||u<3)p=['#dfffd7','#62d84e','#168a2e','#66e05d','#0b4817','rgba(70,210,70,.72)'];
+    else if(u<6)p=['#fff7ad','#ffd735','#f29d00','#ffe35a','#6a4300','rgba(255,218,60,.72)'];
+    else if(u<8)p=['#ffe4af','#ff9f27','#e85b00','#ffb13b','#6a2600','rgba(255,133,30,.72)'];
+    else if(u<11)p=['#ffd3d3','#ff5050','#c80000','#ff6666','#650000','rgba(255,60,60,.72)'];
+    else p=['#f2d8ff','#a95ae8','#6213a8','#c16cff','#3a0860','rgba(169,87,232,.75)'];
+    var s1=icon.querySelector('.uv-stop-1'),s2=icon.querySelector('.uv-stop-2'),s3=icon.querySelector('.uv-stop-3'),ray=icon.querySelector('.uv-rays path'),label=icon.querySelector('.uv-label');
+    if(s1)s1.setAttribute('stop-color',p[0]);if(s2)s2.setAttribute('stop-color',p[1]);if(s3)s3.setAttribute('stop-color',p[2]);if(ray)ray.setAttribute('stroke',p[3]);if(label)label.setAttribute('fill',p[4]);icon.style.setProperty('--uv-glow',p[5]);
+  }
   function pollenLevel(v){v=Number(v);if(!isFinite(v)||v<=0)return 'NINCS / ALACSONY';if(v<10)return 'ALACSONY';if(v<50)return 'KÖZEPES';if(v<100)return 'MAGAS';return 'NAGYON MAGAS'}
   var pollenNames={alder_pollen:'ÉGER',birch_pollen:'NYÍR',grass_pollen:'FŰFÉLÉK',mugwort_pollen:'ÜRÖM',olive_pollen:'OLAJFA',ragweed_pollen:'PARLAGFŰ'};
   function getHourly(h,key,i){return h&&h[key]&&h[key][i]!=null?Number(h[key][i]):NaN}
@@ -8467,10 +8480,10 @@ document.addEventListener("DOMContentLoaded",function(){
     var lat=47.5357,lon=19.0068;
     var aq='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+lat+'&longitude='+lon+'&hourly=uv_index,european_aqi,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen&timezone=Europe%2FBudapest&forecast_days=1';
     var rain='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=precipitation_probability,precipitation&timezone=Europe%2FBudapest&forecast_days=1';
-    fetchJson(aq).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time);var uv=getHourly(h,'uv_index',i),aqi=getHourly(h,'european_aqi',i);el('weatherUvText').textContent='UV-index: '+(isFinite(uv)?uv.toFixed(1).replace('.',','):'--')+' / SPF '+spfForUv(uv);el('weatherAirText').textContent='Levegőminőség: '+(isFinite(aqi)?Math.round(aqi):'--')+' / '+huAqi(aqi);
+    fetchJson(aq).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time);var uv=getHourly(h,'uv_index',i),aqi=getHourly(h,'european_aqi',i);el('weatherUvText').textContent='UV-index: '+(isFinite(uv)?uv.toFixed(1).replace('.',','):'--')+' / '+uvCategory(uv)+' ( SPF '+spfForUv(uv)+' )';applyUvIconColor(uv);el('weatherAirText').textContent='Levegőminőség: '+(isFinite(aqi)?Math.round(aqi):'--')+' / '+huAqi(aqi);
       var bestKey=null,best=-1;Object.keys(pollenNames).forEach(function(k){var v=getHourly(h,k,i);if(isFinite(v)&&v>best){best=v;bestKey=k}});if(bestKey){el('weatherPollenText').textContent='Pollen: '+pollenNames[bestKey]+' / '+pollenLevel(best)}else{el('weatherPollenText').textContent='Pollen: -- / --'}
       try{localStorage.setItem('weatherExtraDataV74',JSON.stringify({uv:el('weatherUvText').textContent,air:el('weatherAirText').textContent,pollen:el('weatherPollenText').textContent,t:Date.now()}))}catch(_){ }
-    }).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherExtraDataV74')||'{}');if(c.uv)el('weatherUvText').textContent=c.uv;if(c.air)el('weatherAirText').textContent=c.air;if(c.pollen)el('weatherPollenText').textContent=c.pollen}catch(_){}});
+    }).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherExtraDataV74')||'{}');if(c.uv){el('weatherUvText').textContent=c.uv;var m=String(c.uv).match(/UV-index:\s*([0-9]+(?:[,.][0-9]+)?)/i);if(m)applyUvIconColor(Number(m[1].replace(',','.')))}if(c.air)el('weatherAirText').textContent=c.air;if(c.pollen)el('weatherPollenText').textContent=c.pollen}catch(_){}});
     fetchJson(rain).then(function(d){var h=d.hourly||{},i=nearestIndex(h.time),maxP=0,sum=0;for(var j=i;j<Math.min(i+2,(h.time||[]).length);j++){var p=getHourly(h,'precipitation_probability',j),mm=getHourly(h,'precipitation',j);if(isFinite(p))maxP=Math.max(maxP,p);if(isFinite(mm))sum+=mm}el('weatherRainText').textContent='Eső: '+Math.round(maxP)+'% / '+sum.toFixed(1).replace('.',',')+' mm';try{localStorage.setItem('weatherRainDataV74',JSON.stringify({text:el('weatherRainText').textContent,t:Date.now()}))}catch(_){}}).catch(function(){try{var c=JSON.parse(localStorage.getItem('weatherRainDataV74')||'{}');if(c.text)el('weatherRainText').textContent=c.text}catch(_){}});
   }
   updateDetails();setInterval(updateDetails,15*60*1000);
