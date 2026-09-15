@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=86">
+  <link rel="manifest" href="./manifest.json?v=87">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2222,7 +2222,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="86">
+<body data-wallclock-version="87">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2290,7 +2290,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v86</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v87</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -6526,31 +6526,26 @@ function v86ConfiguredHourlySource(){
   return customSoundObjectUrl || v43ManualAudioUrl || "";
 }
 
-let v86LastKeys = {};
-let v86LastAttempts = {};
-function v86ChimeKey(now, minute){
-  return now.getFullYear()+"-"+now.getMonth()+"-"+now.getDate()+"-"+now.getHours()+"-"+minute;
+let v87LastScheduledKey = "";
+let v87LastAttemptKey = "";
+let v87LastAttemptAt = 0;
+function v87ScheduleKey(now, minute){return now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate()+"-"+now.getHours()+"-"+minute;}
+function v87QuarterEnabled(minute){if(minute===15)return !!settings.quarter15Enabled;if(minute===30)return !!settings.quarter30Enabled;if(minute===45)return !!settings.quarter45Enabled;return false;}
+function v87QuarterSound(minute){if(minute===15)return quarter15Sound?quarter15Sound.value:settings.quarter15Sound;if(minute===30)return quarter30Sound?quarter30Sound.value:settings.quarter30Sound;if(minute===45)return quarter45Sound?quarter45Sound.value:settings.quarter45Sound;return "";}
+function v87ScheduledSource(minute){if(minute===0)return v86ConfiguredHourlySource();return v62SourceForListSound(v87QuarterSound(minute));}
+function v87CheckScheduledChime(now){
+ var minute=now.getMinutes(); if(minute!==0&&minute!==15&&minute!==30&&minute!==45)return;
+ var hour=now.getHours(); if(!settings.chimeHours.includes(hour)||!settings.chimeDays.includes(now.getDay()))return;
+ if(minute!==0&&!v87QuarterEnabled(minute))return;
+ var key=v87ScheduleKey(now,minute); if(v87LastScheduledKey===key)return;
+ var t=Date.now(); if(v87LastAttemptKey===key&&(t-v87LastAttemptAt)<4000)return; v87LastAttemptKey=key;v87LastAttemptAt=t;
+ var src=v87ScheduledSource(minute); if(!src){if(minute===0)v87LastScheduledKey=key;return;}
+ v86PlaySource(src,function(){v87LastScheduledKey=key;},function(){});
 }
-function v86TryScheduled(now, minute, enabled, src){
-  if(!enabled) return;
-  var hour=now.getHours();
-  if(!settings.chimeHours.includes(hour)||!settings.chimeDays.includes(now.getDay())) return;
-  if(now.getMinutes()!==minute) return;
-  var key=v86ChimeKey(now,minute);
-  if(v86LastKeys[key]) return;
-  var t=Date.now();
-  if(v86LastAttempts[key] && t-v86LastAttempts[key]<5000) return;
-  v86LastAttempts[key]=t;
-  if(!src){ v86LastKeys[key]=true; return; }
-  v86PlaySource(src,function(){ v86LastKeys[key]=true; },function(){});
-}
-function v86CheckAllChimes(now){
-  var m=now.getMinutes();
-  if(m===0) v86TryScheduled(now,0,true,v86ConfiguredHourlySource());
-  else if(m===15) v86TryScheduled(now,15,!!settings.quarter15Enabled,v62SourceForListSound(settings.quarter15Sound));
-  else if(m===30) v86TryScheduled(now,30,!!settings.quarter30Enabled,v62SourceForListSound(settings.quarter30Sound));
-  else if(m===45) v86TryScheduled(now,45,!!settings.quarter45Enabled,v62SourceForListSound(settings.quarter45Sound));
-}
+let v87ChimeWatchdog=setInterval(function(){v87CheckScheduledChime(new Date());},1000);
+window.addEventListener("pageshow",function(){v87CheckScheduledChime(new Date());});
+document.addEventListener("visibilitychange",function(){if(!document.hidden)v87CheckScheduledChime(new Date());});
+function v86CheckAllChimes(now){v87CheckScheduledChime(now||new Date());}
 
 /* Arm the exact same media element used later by automatic playback. */
 ["touchstart","pointerdown","mousedown","keydown"].forEach(function(evt){
@@ -7783,23 +7778,6 @@ function scheduleClockUpdate() {
 scheduleClockUpdate();
 
 /* v86: independent scheduler for :00, :15, :30 and :45 boundaries. */
-let v86BoundaryTimer=null;
-function v86ScheduleNextBoundary(){
-  if(v86BoundaryTimer) clearTimeout(v86BoundaryTimer);
-  var now=new Date();
-  var next=new Date(now);
-  next.setSeconds(0,0);
-  var minute=now.getMinutes();
-  var nextMinute = minute<15 ? 15 : minute<30 ? 30 : minute<45 ? 45 : 60;
-  if(nextMinute===60){ next.setHours(next.getHours()+1); next.setMinutes(0,0,0); }
-  else next.setMinutes(nextMinute,0,0);
-  var delay=Math.max(250,next.getTime()-now.getTime());
-  v86BoundaryTimer=setTimeout(function(){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); },delay);
-}
-v86ScheduleNextBoundary();
-window.addEventListener("pageshow",function(){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); });
-document.addEventListener("visibilitychange",function(){ if(!document.hidden){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); } });
-
 setInterval(updateWeather, 10 * 60 * 1000);
 
 
@@ -8702,7 +8680,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=86", { updateViaCache: "none" })
+      .register("./service-worker.js?v=87", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })

@@ -1,6 +1,6 @@
-const CACHE_NAME = "wallclock-v86";
-const INDEX_CACHE_KEY = "./index.html?v=86";
-const APP_FILES = [INDEX_CACHE_KEY, "./manifest.json?v=86"];
+const CACHE_NAME = "wallclock-v87";
+const INDEX_CACHE_KEY = "./index.html?v=87";
+const APP_FILES = [INDEX_CACHE_KEY, "./manifest.json?v=87"];
 
 self.addEventListener("install", function(event) {
   self.skipWaiting();
