@@ -1,19 +1,18 @@
-const CACHE_NAME = "wallclock-v80";
-const APP_FILES = ["./index.html?v=76", "./manifest.json?v=76"];
+const CACHE_NAME = "wallclock-v81";
+const INDEX_CACHE_KEY = "./index.html?v=81";
+const APP_FILES = [INDEX_CACHE_KEY, "./manifest.json?v=81"];
 
 self.addEventListener("install", function(event) {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return Promise.all(
-        APP_FILES.map(function(url) {
-          return fetch(url, { cache: "reload" })
-            .then(function(response) {
-              if (response && response.ok) return cache.put(url, response.clone());
-            })
-            .catch(function(){});
-        })
-      );
+      return Promise.all(APP_FILES.map(function(url) {
+        return fetch(url, { cache: "no-store" })
+          .then(function(response) {
+            if (response && response.ok) return cache.put(url, response.clone());
+          })
+          .catch(function(){});
+      }));
     })
   );
 });
@@ -22,12 +21,10 @@ self.addEventListener("activate", function(event) {
   event.waitUntil(
     caches.keys()
       .then(function(keys) {
-        return Promise.all(
-          keys.filter(function(k){ return k !== CACHE_NAME; })
-              .map(function(k){ return caches.delete(k); })
-        );
+        return Promise.all(keys.filter(function(k){ return k !== CACHE_NAME; })
+          .map(function(k){ return caches.delete(k); }));
       })
-      .then(function() { return self.clients.claim(); })
+      .then(function(){ return self.clients.claim(); })
   );
 });
 
@@ -35,11 +32,15 @@ self.addEventListener("fetch", function(event) {
   if (event.request.method !== "GET") return;
 
   var url = new URL(event.request.url);
-
-  /* Never intercept API/weather requests. */
   if (url.origin !== self.location.origin) return;
 
-  /* HTML/navigation must always try the actual server first. */
+  /* gamma.json must never come from an old cache. */
+  if (url.pathname.endsWith("/gamma.json")) {
+    event.respondWith(fetch(event.request, { cache: "no-store" }));
+    return;
+  }
+
+  /* Navigations and index.html are always network-first. */
   if (event.request.mode === "navigate" ||
       event.request.destination === "document" ||
       url.pathname.endsWith("/index.html")) {
@@ -47,34 +48,27 @@ self.addEventListener("fetch", function(event) {
       fetch(event.request, { cache: "no-store" })
         .then(function(response) {
           if (response && response.ok) {
-            var copy = response.clone();
             caches.open(CACHE_NAME).then(function(cache) {
-              cache.put("./index.html?v=76", copy).catch(function(){});
+              cache.put(INDEX_CACHE_KEY, response.clone()).catch(function(){});
             });
           }
           return response;
         })
-        .catch(function() {
-          return caches.match("./index.html?v=76");
-        })
+        .catch(function(){ return caches.match(INDEX_CACHE_KEY); })
     );
     return;
   }
 
-  /* Other same-origin files: network first, cache fallback. */
   event.respondWith(
     fetch(event.request, { cache: "no-store" })
       .then(function(response) {
         if (response && response.ok) {
-          var copy = response.clone();
           caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, copy).catch(function(){});
+            cache.put(event.request, response.clone()).catch(function(){});
           });
         }
         return response;
       })
-      .catch(function() {
-        return caches.match(event.request);
-      })
+      .catch(function(){ return caches.match(event.request); })
   );
 });
