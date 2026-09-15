@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=87">
+  <link rel="manifest" href="./manifest.json?v=88">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2220,9 +2220,16 @@ body.pseudo-fullscreen #app {
 .v82-quarter-toggle.is-on{background:#f2d34f;color:#111;border-color:#f2d34f}
 @media(max-width:520px){.v82-quarter-row{grid-template-columns:1fr 1.35fr;gap:7px}.v82-quarter-toggle{font-size:12px;padding-left:6px;padding-right:6px}}
 
+/* v88 template system */
+.v88-template-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:4px 0 9px}
+.v88-template-custom{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.v88-template-btn,.v88-template-custom button{margin:0!important;min-width:0;padding:10px 5px!important;font-size:12px!important}
+.v88-template-btn.v88-active{background:#f2d34f!important;color:#111!important;border-color:#f2d34f!important}
+.v88-template-status{font-size:11px;line-height:1.35;opacity:.7;margin-top:8px}
+@media(max-width:620px){.v88-template-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
-<body data-wallclock-version="87">
+<body data-wallclock-version="88">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2290,9 +2297,21 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v87</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v88</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
+<section class="settings-group v88-template-group">
+<h3>LAYOUT TEMPLATE</h3>
+<div class="v88-template-grid">
+<button type="button" class="secondary-button v88-template-btn" data-template="current">CURRENT</button>
+<button type="button" class="secondary-button v88-template-btn" data-template="minimal">MINIMAL</button>
+<button type="button" class="secondary-button v88-template-btn" data-template="balanced">BALANCED</button>
+<button type="button" class="secondary-button v88-template-btn" data-template="weather">WEATHER</button>
+<button type="button" class="secondary-button v88-template-btn" data-template="info">INFO</button>
+</div>
+<div class="v88-template-custom"><button id="v88SaveCustom" type="button" class="secondary-button">SAVE CUSTOM</button><button id="v88LoadCustom" type="button" class="secondary-button">CUSTOM</button></div>
+<div id="v88TemplateStatus" class="v88-template-status">CURRENT = a v87-ből átvett jelenlegi elrendezés.</div>
+</section>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
 <label class="check-row"><input id="showHeader" type="checkbox" checked><span>Ki / Be</span></label>
 <label>Szöveg színe <input id="headerTextColor" type="color" value="#ffffff"></label>
@@ -8680,7 +8699,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=87", { updateViaCache: "none" })
+      .register("./service-worker.js?v=88", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
@@ -8928,6 +8947,34 @@ document.addEventListener("DOMContentLoaded",function(){
 
 
 <script>
+/* v88 – Layout templates */
+(function(){
+var CK="v88CurrentLayout",UK="v88CustomLayout";
+var keys=["showHeader","headerSize","headerFontScaleX","headerFontScaleY","headerX","headerY","showClock","clockSize","clockFontScaleX","clockFontScaleY","clockX","clockY","showSeconds","secondsSize","secondsFontScaleX","secondsFontScaleY","secondsX","secondsY","separatorSize","separatorX","separatorY","separatorGap","showCalendarWeek","calendarWeekSize","calendarWeekSizePx","calendarWeekX","calendarWeekY","v42pos_header_x","v42pos_header_y","v42pos_clock_x","v42pos_clock_y","v42pos_seconds_x","v42pos_seconds_y","v42pos_separator_x","v42pos_separator_y","v42pos_weather_x","v42pos_weather_y","v42pos_calendar_x","v42pos_calendar_y","weatherExtraV74","showGamma","gammaSize","gammaIconSize","gammaX","gammaY","gammaFontScaleX","gammaFontScaleY"];
+function cap(){var o={};keys.forEach(function(k){var v=localStorage.getItem(k);if(v!==null)o[k]=v});return o}
+function put(k,o){try{localStorage.setItem(k,JSON.stringify(o));return true}catch(_){return false}}
+function get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(_){return null}}
+function restore(o){if(!o)return false;keys.forEach(function(k){localStorage.removeItem(k)});Object.keys(o).forEach(function(k){if(keys.indexOf(k)>=0)localStorage.setItem(k,String(o[k]))});return true}
+function set(k,v){localStorage.setItem(k,String(v))}
+function pos(n,x,y){set("v42pos_"+n+"_x",x);set("v42pos_"+n+"_y",y);if(n==="calendar"){set("calendarWeekX",x);set("calendarWeekY",y)}}
+function wx(mode){var b={showCurrent:true,showDescription:false,showUv:true,showAir:true,showPollen:true,showRain:true,opacity:100,currentTextSize:36,currentTextScaleX:100,currentTextScaleY:100,currentIconSize:72,currentX:0,currentY:165,uvTextSize:20,uvTextScaleX:92,uvTextScaleY:100,uvIconSize:38,uvX:-330,uvY:310,airTextSize:20,airTextScaleX:92,airTextScaleY:100,airIconSize:38,airX:-115,airY:310,pollenTextSize:20,pollenTextScaleX:92,pollenTextScaleY:100,pollenIconSize:38,pollenX:125,pollenY:310,rainTextSize:20,rainTextScaleX:92,rainTextScaleY:100,rainIconSize:38,rainX:345,rainY:310};
+if(mode==="minimal"){b.showUv=b.showAir=b.showPollen=b.showRain=false;b.currentTextSize=40;b.currentIconSize=78;b.currentY=205}
+if(mode==="weather"){b.showDescription=true;b.currentTextSize=42;b.currentIconSize=88;b.currentY=145;b.uvTextSize=b.airTextSize=b.pollenTextSize=b.rainTextSize=25;b.uvIconSize=b.airIconSize=b.pollenIconSize=b.rainIconSize=48;b.uvX=-235;b.uvY=245;b.airX=235;b.airY=245;b.pollenX=-235;b.pollenY=325;b.rainX=235;b.rainY=325}
+if(mode==="info"){b.currentTextSize=34;b.currentIconSize=68;b.currentY=155;b.uvTextSize=b.airTextSize=b.pollenTextSize=b.rainTextSize=24;b.uvIconSize=b.airIconSize=b.pollenIconSize=b.rainIconSize=44;b.uvX=-245;b.uvY=245;b.airX=245;b.airY=245;b.pollenX=-245;b.pollenY=325;b.rainX=245;b.rainY=325}return b}
+function preset(n){set("showHeader",true);set("showClock",true);set("showCalendarWeek",true);set("showGamma",true);
+if(n==="minimal"){set("clockSize",165);set("showSeconds",false);set("headerSize",70);set("calendarWeekSize",28);set("calendarWeekSizePx",28);pos("header",0,285);pos("clock",0,20);pos("separator",0,20);pos("calendar",390,-315);set("gammaSize",28);set("gammaIconSize",54);set("gammaX",300);set("gammaY",165);set("weatherExtraV74",JSON.stringify(wx("minimal")))}
+if(n==="balanced"){set("clockSize",155);set("showSeconds",true);set("secondsSize",48);set("headerSize",72);set("calendarWeekSize",28);set("calendarWeekSizePx",28);pos("header",0,290);pos("clock",0,5);pos("separator",0,5);pos("seconds",155,72);pos("calendar",390,-315);set("gammaSize",34);set("gammaIconSize",64);set("gammaX",245);set("gammaY",165);set("weatherExtraV74",JSON.stringify(wx("balanced")))}
+if(n==="weather"){set("clockSize",125);set("showSeconds",false);set("headerSize",68);set("calendarWeekSize",26);set("calendarWeekSizePx",26);pos("header",0,300);pos("clock",0,-55);pos("separator",0,-55);pos("calendar",390,-320);set("gammaSize",26);set("gammaIconSize",50);set("gammaX",330);set("gammaY",150);set("weatherExtraV74",JSON.stringify(wx("weather")))}
+if(n==="info"){set("clockSize",132);set("showSeconds",true);set("secondsSize",42);set("headerSize",66);set("calendarWeekSize",25);set("calendarWeekSizePx",25);pos("header",0,305);pos("clock",0,-45);pos("separator",0,-45);pos("seconds",145,35);pos("calendar",390,-320);set("gammaSize",30);set("gammaIconSize",56);set("gammaX",300);set("gammaY",150);set("weatherExtraV74",JSON.stringify(wx("info")))}
+set("v88LastTemplate",n);location.reload()}
+if(!localStorage.getItem(CK))put(CK,cap());
+function status(t){var e=document.getElementById("v88TemplateStatus");if(e)e.textContent=t}
+document.querySelectorAll(".v88-template-btn").forEach(function(b){b.addEventListener("click",function(){var n=b.getAttribute("data-template");if(n==="current"){if(restore(get(CK))){set("v88LastTemplate","current");location.reload()}}else preset(n)})});
+var sv=document.getElementById("v88SaveCustom"),ld=document.getElementById("v88LoadCustom");
+if(sv)sv.addEventListener("click",function(){status(put(UK,cap())?"CUSTOM elrendezés elmentve.":"A CUSTOM mentése nem sikerült.")});
+if(ld)ld.addEventListener("click",function(){var o=get(UK);if(!o){status("Még nincs elmentett CUSTOM elrendezés.");return}restore(o);set("v88LastTemplate","custom");location.reload()});
+var a=localStorage.getItem("v88LastTemplate")||"current";document.querySelectorAll(".v88-template-btn").forEach(function(b){b.classList.toggle("v88-active",b.getAttribute("data-template")===a)});
+})();
 /* v80 – every yellow CLOCK SETUP section can be collapsed by tapping its heading. */
 (function(){
   function init(){
