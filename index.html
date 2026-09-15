@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=81">
+  <link rel="manifest" href="./manifest.json?v=82">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2211,9 +2211,18 @@ body.pseudo-fullscreen #app {
 #settingsPanel .v80-section-body { display:block; }
 #settingsPanel .settings-group.v80-collapsed > .v80-section-body { display:none !important; }
 
+
+/* v82 – quarter-hour chimes */
+.v82-quarter-chimes{display:flex;flex-direction:column;gap:9px;margin:4px 0 18px}
+.v82-quarter-row{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,1.6fr);gap:10px;align-items:center}
+.v82-quarter-row select{width:100%;min-width:0}
+.v82-quarter-toggle{width:100%;margin:0}
+.v82-quarter-toggle.is-on{background:#f2d34f;color:#111;border-color:#f2d34f}
+@media(max-width:520px){.v82-quarter-row{grid-template-columns:1fr 1.35fr;gap:7px}.v82-quarter-toggle{font-size:12px;padding-left:6px;padding-right:6px}}
+
 </style>
 </head>
-<body data-wallclock-version="81">
+<body data-wallclock-version="82">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2281,7 +2290,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v81</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v82</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -5268,6 +5277,54 @@ body.pseudo-fullscreen #app {
 </section>
 
 <section class="settings-group"><h3>Óránkénti hangjelzés</h3>
+<div class="v82-quarter-chimes">
+  <div class="v82-quarter-row">
+    <button id="quarter15Toggle" type="button" class="secondary-button v82-quarter-toggle">15. PERC: KI</button>
+    <select id="quarter15Sound" aria-label="15. perces hang"><option value="airplaneChime">Airplane Chime</option>
+<option value="beep2xHiLow">Beep 2x Hi-Low</option>
+<option value="beepBeepEchoV1">Beep Beep Echo V1</option>
+<option value="beepBeepEchoV2">Beep Beep Echo V2</option>
+<option value="bells">Bells</option>
+<option value="casioClassic">CASIO Classic</option>
+<option value="chimeFuturistic">Chime Futuristic</option>
+<option value="crosswalk">Crosswalk</option>
+<option value="echoedChime">Echoed Chime</option>
+<option value="kalimba">Kalimba</option>
+<option value="meow">Meow</option>
+<option value="windShrine">Wind Shrine</option></select>
+  </div>
+  <div class="v82-quarter-row">
+    <button id="quarter30Toggle" type="button" class="secondary-button v82-quarter-toggle">30. PERC: KI</button>
+    <select id="quarter30Sound" aria-label="30. perces hang"><option value="airplaneChime">Airplane Chime</option>
+<option value="beep2xHiLow">Beep 2x Hi-Low</option>
+<option value="beepBeepEchoV1">Beep Beep Echo V1</option>
+<option value="beepBeepEchoV2">Beep Beep Echo V2</option>
+<option value="bells">Bells</option>
+<option value="casioClassic">CASIO Classic</option>
+<option value="chimeFuturistic">Chime Futuristic</option>
+<option value="crosswalk">Crosswalk</option>
+<option value="echoedChime">Echoed Chime</option>
+<option value="kalimba">Kalimba</option>
+<option value="meow">Meow</option>
+<option value="windShrine">Wind Shrine</option></select>
+  </div>
+  <div class="v82-quarter-row">
+    <button id="quarter45Toggle" type="button" class="secondary-button v82-quarter-toggle">45. PERC: KI</button>
+    <select id="quarter45Sound" aria-label="45. perces hang"><option value="airplaneChime">Airplane Chime</option>
+<option value="beep2xHiLow">Beep 2x Hi-Low</option>
+<option value="beepBeepEchoV1">Beep Beep Echo V1</option>
+<option value="beepBeepEchoV2">Beep Beep Echo V2</option>
+<option value="bells">Bells</option>
+<option value="casioClassic">CASIO Classic</option>
+<option value="chimeFuturistic">Chime Futuristic</option>
+<option value="crosswalk">Crosswalk</option>
+<option value="echoedChime">Echoed Chime</option>
+<option value="kalimba">Kalimba</option>
+<option value="meow">Meow</option>
+<option value="windShrine">Wind Shrine</option></select>
+  </div>
+</div>
+
 <label>Hang kiválasztása listából<select id="beepSound">
 <option value="manual">** Manual Selection **</option>
 <option value="airplaneChime">Airplane Chime</option>
@@ -5418,6 +5475,12 @@ const chimeHourChecks = Array.from(document.querySelectorAll(".chime-hour"));
 const chimeDayChecks = Array.from(document.querySelectorAll(".chime-day"));
 const beepSound = document.getElementById("beepSound");
 const beepVolume = document.getElementById("beepVolume");
+const quarter15Toggle = document.getElementById("quarter15Toggle");
+const quarter30Toggle = document.getElementById("quarter30Toggle");
+const quarter45Toggle = document.getElementById("quarter45Toggle");
+const quarter15Sound = document.getElementById("quarter15Sound");
+const quarter30Sound = document.getElementById("quarter30Sound");
+const quarter45Sound = document.getElementById("quarter45Sound");
 
 const clockSizeValue = document.getElementById("clockSizeValue");
 const clockYValue = document.getElementById("clockYValue");
@@ -5465,6 +5528,8 @@ let v79FallbackAudioArmed = false;
 let v79PendingHourKey = null;
 let v79LastAttemptAt = 0;
 let v62ArmPromise = null;
+let v82LastQuarterKey = null;
+let v82LastQuarterAttemptAt = 0;
 
 /* v64: iOS Safari ignores HTMLMediaElement.volume in many cases.
    Route the persistent audio element through WebAudio GainNode instead. */
@@ -5547,7 +5612,13 @@ const settings = {
   chimeHours: (()=>{try{return JSON.parse(localStorage.getItem("chimeHours"))||Array.from({length:15},(_,i)=>i+8)}catch(e){return Array.from({length:15},(_,i)=>i+8)}})(),
   chimeDays: (()=>{try{return JSON.parse(localStorage.getItem("chimeDays"))||[0,1,2,3,4,5,6]}catch(e){return [0,1,2,3,4,5,6]}})(),
   beepSound: localStorage.getItem("beepSound") || "digital01",
-  beepVolume: Number(localStorage.getItem("beepVolume") || 100)
+  beepVolume: Number(localStorage.getItem("beepVolume") || 100),
+  quarter15Enabled: localStorage.getItem("quarter15Enabled") === "true",
+  quarter30Enabled: localStorage.getItem("quarter30Enabled") === "true",
+  quarter45Enabled: localStorage.getItem("quarter45Enabled") === "true",
+  quarter15Sound: localStorage.getItem("quarter15Sound") || "casioClassic",
+  quarter30Sound: localStorage.getItem("quarter30Sound") || "casioClassic",
+  quarter45Sound: localStorage.getItem("quarter45Sound") || "casioClassic"
 };
 
 function pad2(n) { return String(n).padStart(2, "0"); }
@@ -5700,6 +5771,7 @@ function updateClock() {
   clockSeparator.classList.toggle("blink-off", blinkOff);
   applyBrightness(now.getHours());
   maybeHourlyChime(now);
+  v82MaybeQuarterChime(now);
 }
 
 function unlockAudio() {
@@ -6501,6 +6573,111 @@ function playDoubleBeep() {
   v62PlayConfiguredHourlySound();
 }
 
+
+function v82UpdateQuarterButtons() {
+  [
+    [quarter15Toggle, settings.quarter15Enabled, "15. PERC"],
+    [quarter30Toggle, settings.quarter30Enabled, "30. PERC"],
+    [quarter45Toggle, settings.quarter45Enabled, "45. PERC"]
+  ].forEach(function(item){
+    if (!item[0]) return;
+    item[0].textContent = item[2] + ": " + (item[1] ? "BE" : "KI");
+    item[0].classList.toggle("is-on", !!item[1]);
+    item[0].setAttribute("aria-pressed", item[1] ? "true" : "false");
+  });
+}
+
+function v82BindQuarterToggle(button, key) {
+  if (!button) return;
+  button.addEventListener("click", function(){
+    settings[key] = !settings[key];
+    localStorage.setItem(key, settings[key] ? "true" : "false");
+    v82UpdateQuarterButtons();
+    try { v62ArmPersistentAudio(); } catch (_) {}
+  });
+}
+
+v82BindQuarterToggle(quarter15Toggle, "quarter15Enabled");
+v82BindQuarterToggle(quarter30Toggle, "quarter30Enabled");
+v82BindQuarterToggle(quarter45Toggle, "quarter45Enabled");
+
+[
+  [quarter15Sound, "quarter15Sound"],
+  [quarter30Sound, "quarter30Sound"],
+  [quarter45Sound, "quarter45Sound"]
+].forEach(function(pair){
+  var select = pair[0], key = pair[1];
+  if (!select) return;
+  ["touchstart","pointerdown","mousedown"].forEach(function(evt){
+    select.addEventListener(evt, function(){ try { v62ArmPersistentAudio(); } catch (_) {} }, {passive:true});
+  });
+  select.addEventListener("change", function(){
+    settings[key] = select.value;
+    localStorage.setItem(key, select.value);
+    /* Same behavior as the existing integrated-sound list: preview the choice. */
+    v62PlayListSoundOnce(select.value);
+  });
+});
+
+function v82QuarterConfig(minute) {
+  if (minute === 15) return { enabled: settings.quarter15Enabled, sound: settings.quarter15Sound };
+  if (minute === 30) return { enabled: settings.quarter30Enabled, sound: settings.quarter30Sound };
+  if (minute === 45) return { enabled: settings.quarter45Enabled, sound: settings.quarter45Sound };
+  return null;
+}
+
+function v82MaybeQuarterChime(now) {
+  var minute = now.getMinutes();
+  var target = (minute === 15 || minute === 30 || minute === 45) ? minute : null;
+  if (target === null) return;
+
+  var cfg = v82QuarterConfig(target);
+  if (!cfg || !cfg.enabled) return;
+
+  var hour = now.getHours();
+  if (!settings.chimeHours.includes(hour) || !settings.chimeDays.includes(now.getDay())) return;
+
+  /* The full target minute is accepted; the key prevents duplicate playback.
+     This is deliberately tolerant of Safari timer throttling. */
+
+  var key = now.getFullYear()+"-"+now.getMonth()+"-"+now.getDate()+"-"+hour+"-"+target;
+  if (v82LastQuarterKey === key) return;
+
+  var t = Date.now();
+  if ((t - v82LastQuarterAttemptAt) < 5000) return;
+  v82LastQuarterAttemptAt = t;
+
+  var src = v62SourceForListSound(cfg.sound);
+  if (!src) {
+    v82LastQuarterKey = key;
+    return;
+  }
+
+  try { v64EnsureGainRoute(); } catch (_) {}
+  try {
+    hourlyAudioPlayer.pause();
+    hourlyAudioPlayer.currentTime = 0;
+    if (hourlyAudioPlayer.src !== src) {
+      hourlyAudioPlayer.src = src;
+      hourlyAudioPlayer.load();
+    }
+    try { hourlyAudioPlayer.volume = v64GainConnected ? 1 : Math.max(0, Math.min(1, settings.beepVolume / 100)); } catch (_) {}
+    v64SetMasterVolume(settings.beepVolume);
+    var playPromise = hourlyAudioPlayer.play();
+    if (playPromise && typeof playPromise.then === "function") {
+      playPromise.then(function(){ v82LastQuarterKey = key; }).catch(function(err){
+        console.warn("Quarter-hour playback blocked:", err);
+      });
+    } else {
+      setTimeout(function(){
+        try { if (!hourlyAudioPlayer.paused) v82LastQuarterKey = key; } catch (_) {}
+      },350);
+    }
+  } catch (e) {
+    console.warn("Quarter-hour playback error:", e);
+  }
+}
+
 function maybeHourlyChime(now) {
   const hour = now.getHours();
   if (!settings.chimeHours.includes(hour) || !settings.chimeDays.includes(now.getDay())) return;
@@ -7125,6 +7302,10 @@ function applySettingsToUI() {
   chimeDayChecks.forEach(cb=>cb.checked=settings.chimeDays.includes(Number(cb.dataset.day)));
   beepSound.value = settings.beepSound;
   beepVolume.value = settings.beepVolume;
+  quarter15Sound.value = settings.quarter15Sound;
+  quarter30Sound.value = settings.quarter30Sound;
+  quarter45Sound.value = settings.quarter45Sound;
+  v82UpdateQuarterButtons();
 
   clockSizeValue.textContent = `${settings.clockSize}%`;
   clockYValue.textContent = `${settings.clockY} vh`;
@@ -7235,6 +7416,9 @@ function saveSettings() {
   settings.chimeDays = chimeDayChecks.filter(cb=>cb.checked).map(cb=>Number(cb.dataset.day));
   settings.beepSound = beepSound.value;
   settings.beepVolume = Number(beepVolume.value);
+  settings.quarter15Sound = quarter15Sound.value;
+  settings.quarter30Sound = quarter30Sound.value;
+  settings.quarter45Sound = quarter45Sound.value;
 
   for (const [key, value] of Object.entries(settings)) {
     if (key !== "backgroundImage") localStorage.setItem(key, value);
@@ -8441,7 +8625,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=81", { updateViaCache: "none" })
+      .register("./service-worker.js?v=82", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })
