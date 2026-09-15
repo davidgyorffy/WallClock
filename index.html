@@ -2187,9 +2187,33 @@ body.pseudo-fullscreen #app {
   display: none !important;
 }
 
+
+/* v80 – collapsible CLOCK SETUP sections */
+#settingsPanel .settings-group > h3 {
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  position: relative;
+  padding-right: 30px !important;
+}
+#settingsPanel .settings-group > h3::after {
+  content: "▾";
+  position: absolute; right: 5px; top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transform-origin: center;
+  transition: transform .18s ease;
+  font-size: .9em;
+}
+#settingsPanel .settings-group.v80-collapsed > h3::after {
+  transform: translateY(-50%) rotate(-90deg);
+}
+#settingsPanel .v80-section-body { display:block; }
+#settingsPanel .settings-group.v80-collapsed > .v80-section-body { display:none !important; }
+
 </style>
 </head>
-<body data-wallclock-version="75">
+<body data-wallclock-version="80">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2257,7 +2281,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v77</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v80</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -5272,12 +5296,11 @@ body.pseudo-fullscreen #app {
 </section>
 
 
-<button id="closeSettings" class="close-settings-button" type="button">Bezárás</button>
 
 <div id="settingsOpacityWrap" class="settings-opacity-wrap">
   <label for="settingsOpacity">Ablak áttetszősége</label>
   <div class="settings-opacity-row">
-    <input id="settingsOpacity" type="range" min="20" max="100" step="1" value="92">
+    <input id="settingsOpacity" type="range" min="0" max="100" step="1" value="92">
     <span id="settingsOpacityValue">92%</span>
   </div>
 </div>
@@ -5343,7 +5366,6 @@ const weatherIconEl = document.getElementById("weatherIcon");
 const settingsButton = document.getElementById("settingsButton");
 const fullscreenButton = document.getElementById("fullscreenButton");
 const settingsPanel = document.getElementById("settingsPanel");
-const closeSettings = document.getElementById("closeSettings");
 
 const showHeader = document.getElementById("showHeader");
 const showClock = document.getElementById("showClock");
@@ -7267,40 +7289,6 @@ async function toggleFullscreen() {
   }
 }
 
-closeSettings.addEventListener("click", () => {
-  /* v71: snapshot Calendar Week independently before closing settings. */
-  try {
-    localStorage.setItem("showCalendarWeek", settings.showCalendarWeek ? "true" : "false");
-    localStorage.setItem("calendarWeekFontFamily", settings.calendarWeekFontFamily);
-    localStorage.setItem("calendarWeekFontBold", settings.calendarWeekFontBold ? "true" : "false");
-    localStorage.setItem("calendarWeekFontScaleX", String(settings.calendarWeekFontScaleX));
-    localStorage.setItem("calendarWeekFontScaleY", String(settings.calendarWeekFontScaleY));
-    localStorage.setItem("calendarWeekSizePx", String(settings.calendarWeekSize));
-    localStorage.setItem("calendarWeekSize", String(settings.calendarWeekSize));
-
-    const cwx = document.getElementById("calendarWeekX");
-    const cwy = document.getElementById("calendarWeekY");
-    if (cwx && cwy) {
-      const x = Number(cwx.value);
-      const y = Number(cwy.value);
-      if (Number.isFinite(x) && Number.isFinite(y)) {
-        settings.calendarWeekX = x;
-        settings.calendarWeekY = y;
-        localStorage.setItem("calendarWeekX", String(x));
-        localStorage.setItem("calendarWeekY", String(y));
-        localStorage.setItem("v42pos_calendar_x", String(x));
-        localStorage.setItem("v42pos_calendar_y", String(y));
-      }
-    }
-  } catch (_) {}
-
-  settingsPanel.classList.add("hidden");
-  settingsPanel.style.removeProperty("display");
-  settingsPanel.style.removeProperty("visibility");
-  settingsPanel.style.removeProperty("opacity");
-  settingsPanel.style.removeProperty("pointer-events");
-});
-
 
 /* v48: lightweight RAF-based live range updates */
 let v48RangeRAF = 0;
@@ -8217,7 +8205,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
   if (opacity && opacityValue) {
     let saved = Number(localStorage.getItem("settingsWindowOpacity"));
-    if (!Number.isFinite(saved) || saved < 20 || saved > 100) saved = 92;
+    if (!Number.isFinite(saved) || saved < 0 || saved > 100) saved = 92;
     opacity.value = String(saved);
 
     function applyOpacity() {
@@ -8696,6 +8684,44 @@ document.addEventListener("DOMContentLoaded",function(){
   document.addEventListener('pointerdown',guard,true);
   document.addEventListener('mousedown',guard,true);
   document.addEventListener('touchstart',guard,{capture:true,passive:false});
+})();
+</script>
+
+
+<script>
+/* v80 – every yellow CLOCK SETUP section can be collapsed by tapping its heading. */
+(function(){
+  function init(){
+    var panel=document.getElementById("settingsPanel");
+    if(!panel) return;
+    var groups=panel.querySelectorAll(".settings-group");
+    for(var i=0;i<groups.length;i++){
+      var group=groups[i];
+      if(group.getAttribute("data-v80-collapse-ready")==="1") continue;
+      var h=group.querySelector(":scope > h3");
+      if(!h){
+        /* Old Safari fallback for :scope. */
+        for(var k=0;k<group.children.length;k++){ if(group.children[k].tagName==="H3"){ h=group.children[k]; break; } }
+      }
+      if(!h) continue;
+      var body=document.createElement("div");
+      body.className="v80-section-body";
+      while(h.nextSibling) body.appendChild(h.nextSibling);
+      group.appendChild(body);
+      group.setAttribute("data-v80-collapse-ready","1");
+      h.setAttribute("role","button"); h.setAttribute("tabindex","0"); h.setAttribute("aria-expanded","true");
+      (function(g,heading){
+        function toggle(e){
+          if(e){ e.preventDefault(); e.stopPropagation(); }
+          var collapsed=g.classList.toggle("v80-collapsed");
+          heading.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        }
+        heading.addEventListener("click",toggle);
+        heading.addEventListener("keydown",function(e){ if(e.key==="Enter" || e.key===" ") toggle(e); });
+      })(group,h);
+    }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
 })();
 </script>
 
