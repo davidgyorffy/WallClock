@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
   <meta name="apple-mobile-web-app-title" content="WallClock">
-  <link rel="manifest" href="./manifest.json?v=85">
+  <link rel="manifest" href="./manifest.json?v=86">
 <!-- v28 single-file Android build -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2222,7 +2222,7 @@ body.pseudo-fullscreen #app {
 
 </style>
 </head>
-<body data-wallclock-version="85">
+<body data-wallclock-version="86">
   <main id="clockApp" class="clock-app">
     <header id="topline" class="topline text-backdrop">
       <span id="date">2026.08.31</span>
@@ -2290,7 +2290,7 @@ body.pseudo-fullscreen #app {
   </main>
 <aside id="settingsPanel" class="settings-panel hidden">
 <div id="settingsHeader" class="settings-header">
-  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v85</span></div>
+  <div class="settings-header-title">CLOCK SETUP <span id="appVersion" style="font-size:.68em;opacity:.65;font-weight:600">v86</span></div>
   <button id="settingsCloseX" class="settings-close-x" type="button" aria-label="Beállítások bezárása">×</button>
 </div>
 <section class="settings-group"><h3>DATE/LOCATION</h3>
@@ -5782,8 +5782,7 @@ function updateClock() {
   const blinkOff = settings.separatorMode === "blink" && (now.getSeconds() % 2 === 1);
   clockSeparator.classList.toggle("blink-off", blinkOff);
   applyBrightness(now.getHours());
-  maybeHourlyChime(now);
-  v82MaybeQuarterChime(now);
+  v86CheckAllChimes(now);
 }
 
 function unlockAudio() {
@@ -6469,6 +6468,95 @@ function v79PlayHourlySoundForKey(key) {
   return v79PlayDirectFallback(src, key);
 }
 
+/* v86 – one persistent HTMLAudio route for previews and all scheduled chimes.
+   The player is unlocked by the first real user gesture. Scheduled playback does
+   not depend on AudioContext/GainNode state, which old iPad Safari may suspend. */
+function v86Player() {
+  return hourlyDirectFallbackPlayer || hourlyAudioPlayer;
+}
+
+function v86ArmAudio() {
+  var player = v86Player();
+  if (!player || v79FallbackAudioArmed) return Promise.resolve(true);
+  try {
+    var oldVolume = player.volume;
+    player.volume = 0;
+    player.src = V62_SILENT_WAV;
+    player.load();
+    var pp = player.play();
+    if (pp && typeof pp.then === "function") {
+      return pp.then(function(){
+        try { player.pause(); player.currentTime=0; player.volume=oldVolume; } catch (_) {}
+        v79FallbackAudioArmed = true;
+        return true;
+      }).catch(function(err){ console.warn("v86 audio unlock blocked:",err); return false; });
+    }
+    v79FallbackAudioArmed = true;
+    try { player.pause(); player.currentTime=0; player.volume=oldVolume; } catch (_) {}
+    return Promise.resolve(true);
+  } catch(e) { console.warn("v86 audio unlock error:",e); return Promise.resolve(false); }
+}
+
+function v86PlaySource(src, success, failure) {
+  var player=v86Player();
+  if (!player || !src) { if(failure) failure(); return false; }
+  try {
+    player.pause();
+    try { player.currentTime=0; } catch (_) {}
+    if (player.src !== src) { player.src=src; player.load(); }
+    try { player.volume=Math.max(0,Math.min(1,settings.beepVolume/100)); } catch (_) {}
+    var pp=player.play();
+    if (pp && typeof pp.then === "function") {
+      pp.then(function(){ if(success) success(); }).catch(function(err){
+        console.warn("v86 scheduled audio blocked:",err); if(failure) failure();
+      });
+    } else {
+      setTimeout(function(){
+        try { if(!player.paused){ if(success) success(); } else if(failure) failure(); }
+        catch(_){ if(failure) failure(); }
+      },300);
+    }
+    return true;
+  } catch(e){ console.warn("v86 audio error:",e); if(failure) failure(); return false; }
+}
+
+function v86ConfiguredHourlySource(){
+  var selected=(settings&&settings.beepSound)?settings.beepSound:"manual";
+  if(selected!=="manual") return v62SourceForListSound(selected);
+  return customSoundObjectUrl || v43ManualAudioUrl || "";
+}
+
+let v86LastKeys = {};
+let v86LastAttempts = {};
+function v86ChimeKey(now, minute){
+  return now.getFullYear()+"-"+now.getMonth()+"-"+now.getDate()+"-"+now.getHours()+"-"+minute;
+}
+function v86TryScheduled(now, minute, enabled, src){
+  if(!enabled) return;
+  var hour=now.getHours();
+  if(!settings.chimeHours.includes(hour)||!settings.chimeDays.includes(now.getDay())) return;
+  if(now.getMinutes()!==minute) return;
+  var key=v86ChimeKey(now,minute);
+  if(v86LastKeys[key]) return;
+  var t=Date.now();
+  if(v86LastAttempts[key] && t-v86LastAttempts[key]<5000) return;
+  v86LastAttempts[key]=t;
+  if(!src){ v86LastKeys[key]=true; return; }
+  v86PlaySource(src,function(){ v86LastKeys[key]=true; },function(){});
+}
+function v86CheckAllChimes(now){
+  var m=now.getMinutes();
+  if(m===0) v86TryScheduled(now,0,true,v86ConfiguredHourlySource());
+  else if(m===15) v86TryScheduled(now,15,!!settings.quarter15Enabled,v62SourceForListSound(settings.quarter15Sound));
+  else if(m===30) v86TryScheduled(now,30,!!settings.quarter30Enabled,v62SourceForListSound(settings.quarter30Sound));
+  else if(m===45) v86TryScheduled(now,45,!!settings.quarter45Enabled,v62SourceForListSound(settings.quarter45Sound));
+}
+
+/* Arm the exact same media element used later by automatic playback. */
+["touchstart","pointerdown","mousedown","keydown"].forEach(function(evt){
+  document.addEventListener(evt,function(){ try{v86ArmAudio();}catch(_){} },{once:true,passive:evt!=="keydown"});
+});
+
 function v62SourceForListSound(selected) {
   if (!selected || selected === "manual") return "";
 
@@ -6484,32 +6572,7 @@ function v62SourceForListSound(selected) {
 }
 
 function v62PlayPersistentSource(src) {
-  if (!hourlyAudioPlayer || !src) return false;
-
-  try {
-    hourlyAudioPlayer.pause();
-    hourlyAudioPlayer.currentTime = 0;
-
-    if (hourlyAudioPlayer.src !== src) {
-      hourlyAudioPlayer.src = src;
-      hourlyAudioPlayer.load();
-    }
-
-    try { v64EnsureGainRoute(); } catch (_) {}
-    try { hourlyAudioPlayer.volume = v64GainConnected ? 1 : Math.max(0, Math.min(1, settings.beepVolume / 100)); } catch (_) {}
-    v64SetMasterVolume(settings.beepVolume);
-
-    var p = hourlyAudioPlayer.play();
-    if (p && typeof p.catch === "function") {
-      p.catch(function(err) {
-        console.warn("Persistent audio playback blocked:", err);
-      });
-    }
-    return true;
-  } catch (e) {
-    console.warn("Persistent audio playback error:", e);
-    return false;
-  }
+  return v86PlaySource(src, function(){}, function(){});
 }
 
 function v62PlayListSoundOnce(selected) {
@@ -7719,24 +7782,23 @@ function scheduleClockUpdate() {
 }
 scheduleClockUpdate();
 
-/* v79: independent top-of-hour wake-up, in addition to the visual clock timer. */
-let v79HourlyBoundaryTimer = null;
-function v79ScheduleHourlyBoundary() {
-  if (v79HourlyBoundaryTimer) clearTimeout(v79HourlyBoundaryTimer);
-  const now = new Date();
-  const next = new Date(now);
-  next.setMinutes(60, 0, 0);
-  const delay = Math.max(250, next.getTime() - now.getTime());
-  v79HourlyBoundaryTimer = setTimeout(function(){
-    maybeHourlyChime(new Date());
-    v79ScheduleHourlyBoundary();
-  }, delay);
+/* v86: independent scheduler for :00, :15, :30 and :45 boundaries. */
+let v86BoundaryTimer=null;
+function v86ScheduleNextBoundary(){
+  if(v86BoundaryTimer) clearTimeout(v86BoundaryTimer);
+  var now=new Date();
+  var next=new Date(now);
+  next.setSeconds(0,0);
+  var minute=now.getMinutes();
+  var nextMinute = minute<15 ? 15 : minute<30 ? 30 : minute<45 ? 45 : 60;
+  if(nextMinute===60){ next.setHours(next.getHours()+1); next.setMinutes(0,0,0); }
+  else next.setMinutes(nextMinute,0,0);
+  var delay=Math.max(250,next.getTime()-now.getTime());
+  v86BoundaryTimer=setTimeout(function(){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); },delay);
 }
-v79ScheduleHourlyBoundary();
-window.addEventListener("pageshow", function(){ maybeHourlyChime(new Date()); v79ScheduleHourlyBoundary(); });
-document.addEventListener("visibilitychange", function(){
-  if (!document.hidden) { maybeHourlyChime(new Date()); v79ScheduleHourlyBoundary(); }
-});
+v86ScheduleNextBoundary();
+window.addEventListener("pageshow",function(){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); });
+document.addEventListener("visibilitychange",function(){ if(!document.hidden){ v86CheckAllChimes(new Date()); v86ScheduleNextBoundary(); } });
 
 setInterval(updateWeather, 10 * 60 * 1000);
 
@@ -8640,7 +8702,7 @@ window.addEventListener("DOMContentLoaded", function () {
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("./service-worker.js?v=85", { updateViaCache: "none" })
+      .register("./service-worker.js?v=86", { updateViaCache: "none" })
       .then(function(reg) {
         try { reg.update(); } catch (_) {}
       })

@@ -1,7 +1,7 @@
 {
   "name": "WallClock",
   "short_name": "WallClock",
-  "start_url": "./?v=85",
+  "start_url": "./?v=86",
   "scope": "./",
   "display": "fullscreen",
   "background_color": "#000000",
