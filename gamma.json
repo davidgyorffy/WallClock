@@ -1,9 +1,9 @@
 {
   "station": "Budapest II. ker. THHE",
   "station_code": "HU0350",
-  "value": 82.0,
+  "value": 88.0,
   "unit": "nSv/h",
-  "updated_utc": "2026-11-04T09:57:38.810229Z",
+  "updated_utc": "2026-11-04T17:56:13.791083Z",
   "source": "https://www.katasztrofavedelem.hu/modules/hattersugarzas/aktualis_adatsor",
   "stale": false
 }
